@@ -66,6 +66,8 @@ public class ListBenchmark {
     scala.collection.immutable.List<Integer> scalaImmutable;
     clojure.lang.IPersistentList clojureImmutable;
     io.vavr.collection.List<Integer> vavrImmutable;
+    org.eclipse.collections.api.list.MutableList<Integer> eclipseMutable;
+    org.eclipse.collections.api.list.ImmutableList<Integer> eclipseImmutable;
 
     @Setup
     @SuppressWarnings("unchecked")
@@ -86,6 +88,8 @@ public class ListBenchmark {
       fjavaImmutable = create(v -> fj.data.List.fromIterator(v.iterator()), javaMutable, v -> areEqual(v, javaMutable));
       pcollectionsImmutable = create(org.pcollections.ConsPStack::from, javaMutable, v -> areEqual(v, javaMutable));
       vavrImmutable = create(io.vavr.collection.List::ofAll, javaMutable, v -> areEqual(v, javaMutable));
+      eclipseMutable = create(org.eclipse.collections.api.factory.Lists.mutable::withAll, javaMutable, v -> areEqual(v, javaMutable));
+      eclipseImmutable = create(org.eclipse.collections.api.factory.Lists.immutable::withAll, javaMutable, v -> areEqual(v, javaMutable));
     }
   }
 
@@ -131,6 +135,20 @@ public class ListBenchmark {
       assert areEqual(values, javaMutable);
       return values.head();
     }
+
+    @Benchmark
+    public Object eclipse_immutable() {
+      final org.eclipse.collections.api.list.ImmutableList<Integer> values = org.eclipse.collections.api.factory.Lists.immutable.withAll(javaMutable);
+      assert areEqual(values, javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object eclipse_mutable() {
+      final org.eclipse.collections.api.list.MutableList<Integer> values = org.eclipse.collections.api.factory.Lists.mutable.withAll(javaMutable);
+      assert areEqual(values, javaMutable);
+      return values;
+    }
   }
 
   public static class Head extends Base {
@@ -173,6 +191,20 @@ public class ListBenchmark {
     public Object vavr_immutable() {
       final Object head = vavrImmutable.head();
       assert Objects.equals(head, javaMutable.get(0));
+      return head;
+    }
+
+    @Benchmark
+    public Object eclipse_immutable() {
+      final Object head = eclipseImmutable.get(0);
+      assert Objects.equals(head, ELEMENTS[0]);
+      return head;
+    }
+
+    @Benchmark
+    public Object eclipse_mutable() {
+      final Object head = eclipseMutable.get(0);
+      assert Objects.equals(head, ELEMENTS[0]);
       return head;
     }
   }
@@ -269,7 +301,28 @@ public class ListBenchmark {
       assert values.isEmpty();
       return values;
     }
+
+    @Benchmark
+    public Object eclipse_immutable() {
+      org.eclipse.collections.api.list.ImmutableList<Integer> values = eclipseImmutable;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values = values.subList(1, values.size());
+      }
+      assert values.isEmpty();
+      return values;
+    }
+
+    @Benchmark
+    public Object eclipse_mutable() {
+      org.eclipse.collections.api.list.MutableList<Integer> values = eclipseMutable;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values = values.subList(1, values.size());
+      }
+      assert values.isEmpty();
+      return values;
+    }
   }
+
 
   public static class Get extends Base {
     @Benchmark
@@ -327,6 +380,26 @@ public class ListBenchmark {
       int aggregate = 0;
       for (int i = 0; i < CONTAINER_SIZE; i++) {
         aggregate ^= vavrImmutable.get(i);
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int eclipse_immutable() {
+      int aggregate = 0;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        aggregate ^= eclipseImmutable.get(i);
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int eclipse_mutable() {
+      int aggregate = 0;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        aggregate ^= eclipseMutable.get(i);
       }
       assert aggregate == EXPECTED_AGGREGATE;
       return aggregate;
@@ -410,6 +483,28 @@ public class ListBenchmark {
       assert values.forAll(e -> e == 0);
       return values;
     }
+
+    @Benchmark
+    public Object eclipse_immutable() {
+      org.eclipse.collections.api.list.ImmutableList<Integer> values = eclipseImmutable;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values = values.subList(0, i)
+            .newWith(0)
+            .newWithAll(values.subList(i + 1, values.size()));
+      }
+      assert values.allSatisfy(e -> e == 0);
+      return values;
+    }
+
+    @Benchmark
+    public Object eclipse_mutable() {
+      org.eclipse.collections.api.list.MutableList<Integer> values = eclipseMutable;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.set(i, 0);
+      }
+      assert values.allSatisfy(e -> e == 0);
+      return values;
+    }
   }
 
   @SuppressWarnings("ManualArrayToCollectionCopy")
@@ -483,6 +578,26 @@ public class ListBenchmark {
       assert areEqual(values.reverse(), javaMutable);
       return values;
     }
+
+    @Benchmark
+    public Object eclipse_immutable() {
+      org.eclipse.collections.api.list.ImmutableList<Integer> values = org.eclipse.collections.api.factory.Lists.immutable.empty();
+      for (Integer element : ELEMENTS) {
+        values = values.newWith(element);
+      }
+      assert areEqual(values.toReversed(), javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object eclipse_mutable() {
+      org.eclipse.collections.api.list.MutableList<Integer> values = org.eclipse.collections.api.factory.Lists.mutable.empty();
+      for (Integer element : ELEMENTS) {
+        values.add(0, element);
+      }
+      assert areEqual(values, javaMutable);
+      return values;
+    }
   }
 
   @SuppressWarnings("ManualArrayToCollectionCopy")
@@ -546,6 +661,26 @@ public class ListBenchmark {
       assert areEqual(values, javaMutable);
       return values;
     }
+
+    @Benchmark
+    public Object eclipse_immutable() {
+      org.eclipse.collections.api.list.ImmutableList<Integer> values = org.eclipse.collections.api.factory.Lists.immutable.empty();
+      for (Integer element : ELEMENTS) {
+        values = values.newWith(element);
+      }
+      assert areEqual(values.toReversed(), javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object eclipse_mutable() {
+      org.eclipse.collections.api.list.MutableList<Integer> values = org.eclipse.collections.api.factory.Lists.mutable.empty();
+      for (Integer element : ELEMENTS) {
+        values.add(0, element);
+      }
+      assert areEqual(values, javaMutable);
+      return values;
+    }
   }
 
   public static class GroupBy extends Base {
@@ -567,6 +702,16 @@ public class ListBenchmark {
     @Benchmark
     public Object vavr_immutable() {
       return vavrImmutable.groupBy(Integer::bitCount);
+    }
+
+    @Benchmark
+    public Object eclipse_immutable() {
+      return eclipseImmutable.groupBy(Integer::bitCount);
+    }
+
+    @Benchmark
+    public Object eclipse_mutable() {
+      return eclipseMutable.groupBy(Integer::bitCount);
     }
   }
 
@@ -641,6 +786,26 @@ public class ListBenchmark {
       assert aggregate == EXPECTED_AGGREGATE;
       return aggregate;
     }
+
+    @Benchmark
+    public int eclipse_immutable() {
+      int aggregate = 0;
+      for (java.util.Iterator<Integer> iterator = eclipseImmutable.iterator(); iterator.hasNext(); ) {
+        aggregate ^= iterator.next();
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int eclipse_mutable() {
+      int aggregate = 0;
+      for (java.util.Iterator<Integer> iterator = eclipseMutable.iterator(); iterator.hasNext(); ) {
+        aggregate ^= iterator.next();
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
   }
 
   public static class Fill extends Base {
@@ -664,6 +829,22 @@ public class ListBenchmark {
     public Object vavr_immutable_constant_object() {
       final io.vavr.collection.List<Integer> values = io.vavr.collection.List.fill(CONTAINER_SIZE, ELEMENTS[0]);
       final Integer head = values.head();
+      assert Objects.equals(head, ELEMENTS[0]);
+      return head;
+    }
+
+    @Benchmark
+    public Object eclipse_immutable_constant_supplier() {
+      final org.eclipse.collections.api.list.ImmutableList<Integer> values = org.eclipse.collections.api.factory.Lists.immutable.withAll(java.util.Collections.nCopies(CONTAINER_SIZE, null));
+      final Integer head = values.get(0);
+      assert Objects.equals(head, ELEMENTS[0]);
+      return head;
+    }
+
+    @Benchmark
+    public Object eclipse_mutable_constant_object() {
+      final org.eclipse.collections.api.list.MutableList<Integer> values = org.eclipse.collections.api.factory.Lists.mutable.withAll(java.util.Collections.nCopies(CONTAINER_SIZE, null));
+      final Integer head = values.get(0);
       assert Objects.equals(head, ELEMENTS[0]);
       return head;
     }

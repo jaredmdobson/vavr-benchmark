@@ -57,7 +57,7 @@ public class ArrayBenchmark {
     io.vavr.collection.Array<Integer> vavrImmutable;
     org.pcollections.PVector<Integer> pcollVector;
     org.eclipse.collections.api.list.MutableList<Integer> eclipseMutable;
-    org.eclipse.collections.api.list.ImmutableList<Integer> eclipseImmutable;
+    org.eclipse.collections.impl.list.mutable.FastList<Integer> eclipseFastList;
 
     @Setup
     public void setup() {
@@ -69,7 +69,7 @@ public class ArrayBenchmark {
       vavrImmutable = create(io.vavr.collection.Array::ofAll, javaMutable, v -> areEqual(v, javaMutable));
       pcollVector = create(org.pcollections.TreePVector::from, javaMutable, v -> areEqual(v, javaMutable));
       eclipseMutable = create(org.eclipse.collections.api.factory.Lists.mutable::withAll, javaMutable, v -> areEqual(v, javaMutable));
-      eclipseImmutable = create(org.eclipse.collections.api.factory.Lists.immutable::withAll, javaMutable, v -> areEqual(v, javaMutable));
+      eclipseFastList = create(s -> org.eclipse.collections.impl.list.mutable.FastList.newList(s.stream().collect(java.util.stream.Collectors.toList())), javaMutable, v -> areEqual(v, javaMutable));
     }
   }
 
@@ -104,8 +104,8 @@ public class ArrayBenchmark {
     }
 
     @Benchmark
-    public Object eclipse_immutable() {
-      final org.eclipse.collections.api.list.ImmutableList<Integer> values = org.eclipse.collections.api.factory.Lists.immutable.withAll(javaMutable);
+    public Object eclipse_fastlist() {
+      final org.eclipse.collections.impl.list.mutable.FastList<Integer> values = org.eclipse.collections.impl.list.mutable.FastList.newList(javaMutable);
       assert areEqual(values, javaMutable);
       return values;
     }
@@ -150,15 +150,15 @@ public class ArrayBenchmark {
     }
 
     @Benchmark
-    public Object eclipse_immutable() {
-      final Object head = javaMutable.get(0);
+    public Object eclipse_fastlist() {
+      final Object head = eclipseFastList.getFirst();
       assert Objects.equals(head, ELEMENTS[0]);
       return head;
     }
 
     @Benchmark
     public Object eclipse_mutable() {
-      final Object head = fjavaMutable.get(0);
+      final Object head = eclipseMutable.getFirst();
       assert Objects.equals(head, ELEMENTS[0]);
       return head;
     }
@@ -211,6 +211,27 @@ public class ArrayBenchmark {
       assert values.isEmpty();
       return values;
     }
+
+    @Benchmark
+    public Object eclipse_fastlist() {
+      org.eclipse.collections.impl.list.mutable.FastList<Integer> values = eclipseFastList;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.remove(0);
+      }
+      assert values.isEmpty();
+      return values;
+    }
+
+    @Benchmark
+    public Object eclipse_mutable() {
+      org.eclipse.collections.api.list.MutableList<Integer> values = eclipseMutable;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values = values.subList(1, values.size());
+      }
+      assert values.isEmpty();
+      return values;
+    }
+
   }
 
   public static class Get extends Base {
@@ -249,6 +270,26 @@ public class ArrayBenchmark {
       int aggregate = 0;
       for (int i = 0; i < CONTAINER_SIZE; i++) {
         aggregate ^= pcollVector.get(i);
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int eclipse_fastlist() {
+      int aggregate = 0;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        aggregate ^= eclipseFastList.get(i);
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int eclipse_mutable() {
+      int aggregate = 0;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        aggregate ^= eclipseMutable.get(i);
       }
       assert aggregate == EXPECTED_AGGREGATE;
       return aggregate;
@@ -295,6 +336,26 @@ public class ArrayBenchmark {
       assert Iterator.ofAll(values).forAll(e -> e == 0);
       return values;
     }
+
+    @Benchmark
+    public Object eclipse_fastlist() {
+      org.eclipse.collections.impl.list.mutable.FastList<Integer> values = eclipseFastList;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.set(i, 0);
+      }
+      assert values.allSatisfy(e -> e == 0);
+      return values;
+    }
+
+    @Benchmark
+    public Object eclipse_mutable() {
+      org.eclipse.collections.api.list.MutableList<Integer> values = eclipseMutable;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.set(i, 0);
+      }
+      assert values.allSatisfy(e -> e == 0);
+      return values;
+    }
   }
 
   public static class Prepend extends Base {
@@ -335,6 +396,26 @@ public class ArrayBenchmark {
         values = values.plus(0, element);
       }
       assert areEqual(List.ofAll(values).reverse(), javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object eclipse_fastlist() {
+      org.eclipse.collections.impl.list.mutable.FastList<Integer> values = org.eclipse.collections.impl.list.mutable.FastList.newList();
+      for (Integer element : ELEMENTS) {
+        values.add(0, element);
+      }
+      assert areEqual(values.reverseThis(), javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object eclipse_mutable() {
+      org.eclipse.collections.api.list.MutableList<Integer> values = org.eclipse.collections.api.factory.Lists.mutable.empty();
+      for (Integer element : ELEMENTS) {
+        values.add(0, element);
+      }
+      assert areEqual(values, javaMutable);
       return values;
     }
   }
@@ -380,6 +461,27 @@ public class ArrayBenchmark {
       assert areEqual(values, javaMutable);
       return values;
     }
+
+    @Benchmark
+    public Object eclipse_fastlist() {
+      org.eclipse.collections.impl.list.mutable.FastList<Integer> values = org.eclipse.collections.impl.list.mutable.FastList.newList();
+      for (Integer element : ELEMENTS) {
+        values.add(element);
+      }
+      assert areEqual(values, javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object eclipse_mutable() {
+      org.eclipse.collections.api.list.MutableList<Integer> values = org.eclipse.collections.api.factory.Lists.mutable.empty();
+      for (Integer element : ELEMENTS) {
+        values.add(0, element);
+      }
+      assert areEqual(values, javaMutable);
+      return values;
+    }
+
   }
 
   @SuppressWarnings("ForLoopReplaceableByForEach")
@@ -423,6 +525,26 @@ public class ArrayBenchmark {
       assert aggregate == EXPECTED_AGGREGATE;
       return aggregate;
     }
+
+    @Benchmark
+    public int eclipse_fastlist() {
+      int aggregate = 0;
+      for (java.util.Iterator<Integer> iterator = eclipseFastList.iterator(); iterator.hasNext(); ) {
+        aggregate ^= iterator.next();
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int eclipse_mutable() {
+      int aggregate = 0;
+      for (java.util.Iterator<Integer> iterator = eclipseMutable.iterator(); iterator.hasNext(); ) {
+        aggregate ^= iterator.next();
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
   }
 
   public static class Fill extends Base {
@@ -438,6 +560,22 @@ public class ArrayBenchmark {
     public Object vavr_immutable_constant_object() {
       final io.vavr.collection.Array<Integer> values = io.vavr.collection.Array.fill(CONTAINER_SIZE, ELEMENTS[0]);
       final Integer head = values.head();
+      assert Objects.equals(head, ELEMENTS[0]);
+      return head;
+    }
+
+    @Benchmark
+    public Object eclipse_fastlist_constant_supplier() {
+      final org.eclipse.collections.impl.list.mutable.FastList<Integer> values = org.eclipse.collections.impl.list.mutable.FastList.newListWith(java.util.Collections.nCopies(CONTAINER_SIZE, ELEMENTS[0]).toArray(new Integer[0]));
+      final Integer head = values.get(0);
+      assert Objects.equals(head, ELEMENTS[0]);
+      return head;
+    }
+
+    @Benchmark
+    public Object eclipse_mutable_constant_object() {
+      final org.eclipse.collections.api.list.MutableList<Integer> values = org.eclipse.collections.api.factory.Lists.mutable.withAll(java.util.Collections.nCopies(CONTAINER_SIZE, null));
+      final Integer head = values.get(0);
       assert Objects.equals(head, ELEMENTS[0]);
       return head;
     }
