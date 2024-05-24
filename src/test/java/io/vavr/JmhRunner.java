@@ -64,7 +64,7 @@ public class JmhRunner {
         TryBenchmark.class,
         TupleBenchmark.class
     );
-    runSlowNoAsserts(CLASSES);
+    runQuickNoAsserts(CLASSES);
   }
 
   public enum Includes {
@@ -92,17 +92,17 @@ public class JmhRunner {
 
   @SuppressWarnings("unused")
   public static void runQuickNoAsserts(Array<Class<?>> groups, Includes... includes) {
-    run(5, 5, 10, VerboseMode.NORMAL, PrintInlining.DISABLE, groups, includes).print();
+    run(10, 5, 10, VerboseMode.NORMAL, PrintInlining.DISABLE, groups, includes).print();
   }
 
   @SuppressWarnings("unused")
   public static void runNormalNoAsserts(Array<Class<?>> groups, Includes... includes) {
-    run(7, 7, 300, VerboseMode.NORMAL, PrintInlining.DISABLE, groups, includes).print();
+    run(7, 6, 300, VerboseMode.NORMAL, PrintInlining.DISABLE, groups, includes).print();
   }
 
   @SuppressWarnings("unused")
   public static void runSlowNoAsserts(Array<Class<?>> groups, Includes... includes) {
-    run(15, 15, 400, VerboseMode.EXTRA, PrintInlining.DISABLE, groups, includes).print();
+    run(10, 6, 400, VerboseMode.EXTRA, PrintInlining.DISABLE, groups, includes).print();
   }
 
   private static BenchmarkPerformanceReporter run(int warmupIterations, int measurementIterations, int millis, VerboseMode silent, PrintInlining printInlining, Array<Class<?>> groups, Includes[] includes) {

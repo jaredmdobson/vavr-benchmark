@@ -92,17 +92,16 @@ public class ArrayBenchmark {
       fjavaMutable = create(fj.data.Array::array, ELEMENTS, ELEMENTS.length, v -> areEqual(v, asList(ELEMENTS)));
       vavrImmutable = create(io.vavr.collection.Array::ofAll, javaMutable, v -> areEqual(v, javaMutable));
       pcollVector = create(org.pcollections.TreePVector::from, javaMutable, v -> areEqual(v, javaMutable));
-      eclipseMutable = create(org.eclipse.collections.api.factory.Lists.mutable::withAll, javaMutable, v -> areEqual(v, javaMutable));
+      eclipseMutable = create(org.eclipse.collections.api.factory.Lists.mutable::withAll, new ArrayList<>(javaMutable), v -> areEqual(v, javaMutable));
       eclipseFastList = create((ArrayList<Integer> s) -> {
         return org.eclipse.collections.impl.list.mutable.FastList.newList(s.stream().collect(java.util.stream.Collectors.toList()));
-      }, javaMutable, v -> areEqual(v, javaMutable));
-      apacheCommonsSetUniqueList = create(org.apache.commons.collections4.list.SetUniqueList::setUniqueList, javaMutable, v -> areEqual(v, javaMutable));
-      fastutilIntArrayList = create(it.unimi.dsi.fastutil.ints.IntArrayList::new, javaMutable, v -> areEqual(v, javaMutable));
+      }, new ArrayList<>(javaMutable), v -> areEqual(v, javaMutable));
+      apacheCommonsSetUniqueList = create(org.apache.commons.collections4.list.SetUniqueList::setUniqueList, new ArrayList<>(javaMutable), v -> areEqual(v, javaMutable));
+      fastutilIntArrayList = create(it.unimi.dsi.fastutil.ints.IntArrayList::new, new ArrayList<>(javaMutable), v -> areEqual(v, javaMutable));
 
-      jctoolsMpscArrayQueue = createAndPopulateMpscArrayQueue(CONTAINER_SIZE, javaMutable);
-      agronaManyToOneConcurrentArrayQueue = createAndPopulateManyToOneConcurrentArrayQueue(CONTAINER_SIZE, javaMutable);
-      hppcIntArrayList = createAndPopulateIntArrayList(CONTAINER_SIZE, javaMutable);
-
+      jctoolsMpscArrayQueue = createAndPopulateMpscArrayQueue(CONTAINER_SIZE, new ArrayList<>(javaMutable));
+      agronaManyToOneConcurrentArrayQueue = createAndPopulateManyToOneConcurrentArrayQueue(CONTAINER_SIZE, new ArrayList<>(javaMutable));
+      hppcIntArrayList = createAndPopulateIntArrayList(CONTAINER_SIZE, new ArrayList<>(javaMutable));
     }
   }
 
@@ -117,35 +116,35 @@ public class ArrayBenchmark {
 
     @Benchmark
     public Object fjava_immutable() {
-      final fj.data.Array<Integer> values = fj.data.Array.iterableArray(javaMutable);
+      final fj.data.Array<Integer> values = fj.data.Array.iterableArray(new ArrayList<>(javaMutable));
       assert areEqual(values, fjavaMutable);
       return values;
     }
 
     @Benchmark
     public Object vavr_immutable() {
-      final io.vavr.collection.Array<Integer> values = io.vavr.collection.Array.ofAll(javaMutable);
+      final io.vavr.collection.Array<Integer> values = io.vavr.collection.Array.ofAll(new ArrayList<>(javaMutable));
       assert areEqual(values, vavrImmutable);
       return values.head();
     }
 
     @Benchmark
     public Object pcoll_vector() {
-      final org.pcollections.PVector<Integer> values = org.pcollections.TreePVector.from(javaMutable);
+      final org.pcollections.PVector<Integer> values = org.pcollections.TreePVector.from(new ArrayList<>(javaMutable));
       assert areEqual(values, pcollVector);
       return values;
     }
 
     @Benchmark
     public Object eclipse_fastlist() {
-      final org.eclipse.collections.impl.list.mutable.FastList<Integer> values = org.eclipse.collections.impl.list.mutable.FastList.newList(javaMutable);
+      final org.eclipse.collections.impl.list.mutable.FastList<Integer> values = org.eclipse.collections.impl.list.mutable.FastList.newList(new ArrayList<>(javaMutable));
       assert areEqual(values, javaMutable);
       return values;
     }
 
     @Benchmark
     public Object eclipse_mutable() {
-      final org.eclipse.collections.api.list.MutableList<Integer> values = org.eclipse.collections.api.factory.Lists.mutable.withAll(javaMutable);
+      final org.eclipse.collections.api.list.MutableList<Integer> values = org.eclipse.collections.api.factory.Lists.mutable.withAll(new ArrayList<>(javaMutable));
       assert areEqual(values, javaMutable);
       return values;
     }
