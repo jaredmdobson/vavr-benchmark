@@ -19,6 +19,7 @@
  */
 package io.vavr.collection;
 
+import com.carrotsearch.hppc.cursors.IntCursor;
 import io.vavr.JmhRunner;
 import org.openjdk.jmh.annotations.*;
 
@@ -58,6 +59,29 @@ public class ArrayBenchmark {
     org.pcollections.PVector<Integer> pcollVector;
     org.eclipse.collections.api.list.MutableList<Integer> eclipseMutable;
     org.eclipse.collections.impl.list.mutable.FastList<Integer> eclipseFastList;
+    org.jctools.queues.MpscArrayQueue<Integer> jctoolsMpscArrayQueue;
+    org.apache.commons.collections4.list.SetUniqueList<Integer> apacheCommonsSetUniqueList;
+    org.agrona.concurrent.ManyToOneConcurrentArrayQueue<Integer> agronaManyToOneConcurrentArrayQueue;
+    com.carrotsearch.hppc.IntArrayList hppcIntArrayList;
+    it.unimi.dsi.fastutil.ints.IntArrayList fastutilIntArrayList;
+
+    public static <T> org.jctools.queues.MpscArrayQueue<T> createAndPopulateMpscArrayQueue(int capacity, ArrayList<T> elements) {
+      org.jctools.queues.MpscArrayQueue<T> queue = new org.jctools.queues.MpscArrayQueue<>(capacity);
+      elements.forEach(queue::offer);
+      return queue;
+    }
+
+    public static <T> org.agrona.concurrent.ManyToOneConcurrentArrayQueue<T> createAndPopulateManyToOneConcurrentArrayQueue(int capacity, ArrayList<T> elements) {
+      org.agrona.concurrent.ManyToOneConcurrentArrayQueue<T> queue = new org.agrona.concurrent.ManyToOneConcurrentArrayQueue<>(capacity);
+      elements.forEach(queue::offer);
+      return queue;
+    }
+
+    public static com.carrotsearch.hppc.IntArrayList createAndPopulateIntArrayList(int capacity, ArrayList<Integer> elements) {
+      com.carrotsearch.hppc.IntArrayList list = new com.carrotsearch.hppc.IntArrayList(capacity);
+      elements.forEach(list::add);
+      return list;
+    }
 
     @Setup
     public void setup() {
@@ -69,7 +93,16 @@ public class ArrayBenchmark {
       vavrImmutable = create(io.vavr.collection.Array::ofAll, javaMutable, v -> areEqual(v, javaMutable));
       pcollVector = create(org.pcollections.TreePVector::from, javaMutable, v -> areEqual(v, javaMutable));
       eclipseMutable = create(org.eclipse.collections.api.factory.Lists.mutable::withAll, javaMutable, v -> areEqual(v, javaMutable));
-      eclipseFastList = create(s -> org.eclipse.collections.impl.list.mutable.FastList.newList(s.stream().collect(java.util.stream.Collectors.toList())), javaMutable, v -> areEqual(v, javaMutable));
+      eclipseFastList = create((ArrayList<Integer> s) -> {
+        return org.eclipse.collections.impl.list.mutable.FastList.newList(s.stream().collect(java.util.stream.Collectors.toList()));
+      }, javaMutable, v -> areEqual(v, javaMutable));
+      apacheCommonsSetUniqueList = create(org.apache.commons.collections4.list.SetUniqueList::setUniqueList, javaMutable, v -> areEqual(v, javaMutable));
+      fastutilIntArrayList = create(it.unimi.dsi.fastutil.ints.IntArrayList::new, javaMutable, v -> areEqual(v, javaMutable));
+
+      jctoolsMpscArrayQueue = createAndPopulateMpscArrayQueue(CONTAINER_SIZE, javaMutable);
+      agronaManyToOneConcurrentArrayQueue = createAndPopulateManyToOneConcurrentArrayQueue(CONTAINER_SIZE, javaMutable);
+      hppcIntArrayList = createAndPopulateIntArrayList(CONTAINER_SIZE, javaMutable);
+
     }
   }
 
@@ -116,6 +149,45 @@ public class ArrayBenchmark {
       assert areEqual(values, javaMutable);
       return values;
     }
+
+    @Benchmark
+    public Object jctools_mpscarrayqueue() {
+      final org.jctools.queues.MpscArrayQueue<Integer> values = new org.jctools.queues.MpscArrayQueue<>(CONTAINER_SIZE);
+      javaMutable.forEach(values::offer);
+      assert areEqual(values, javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object apache_commons_setuniquelist() {
+      final org.apache.commons.collections4.list.SetUniqueList<Integer> values = org.apache.commons.collections4.list.SetUniqueList.setUniqueList(new ArrayList<>(javaMutable));
+      assert areEqual(values, javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object agrona_manytooneconcurrentarrayqueue() {
+      final org.agrona.concurrent.ManyToOneConcurrentArrayQueue<Integer> values = new org.agrona.concurrent.ManyToOneConcurrentArrayQueue<>(CONTAINER_SIZE);
+      javaMutable.forEach(values::offer);
+      assert areEqual(values, javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object hppc_intarraylist() {
+      final com.carrotsearch.hppc.IntArrayList values = new com.carrotsearch.hppc.IntArrayList();
+      javaMutable.forEach(values::add);
+      assert areEqual(values, javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object fastutil_intarraylist() {
+      final it.unimi.dsi.fastutil.ints.IntArrayList values = new it.unimi.dsi.fastutil.ints.IntArrayList();
+      javaMutable.forEach(values::add);
+      assert areEqual(values, javaMutable);
+      return values;
+    }
   }
 
   public static class Head extends Base {
@@ -159,6 +231,41 @@ public class ArrayBenchmark {
     @Benchmark
     public Object eclipse_mutable() {
       final Object head = eclipseMutable.getFirst();
+      assert Objects.equals(head, ELEMENTS[0]);
+      return head;
+    }
+
+    @Benchmark
+    public Object jctools_mpscarrayqueue() {
+      final Object head = jctoolsMpscArrayQueue.poll();
+      assert Objects.equals(head, ELEMENTS[0]);
+      return head;
+    }
+
+    @Benchmark
+    public Object apache_commons_setuniquelist() {
+      final Object head = apacheCommonsSetUniqueList.get(0);
+      assert Objects.equals(head, ELEMENTS[0]);
+      return head;
+    }
+
+    @Benchmark
+    public Object agrona_manytooneconcurrentarrayqueue() {
+      final Object head = agronaManyToOneConcurrentArrayQueue.poll();
+      assert Objects.equals(head, ELEMENTS[0]);
+      return head;
+    }
+
+    @Benchmark
+    public Object hppc_intarraylist() {
+      final Object head = hppcIntArrayList.get(0);
+      assert Objects.equals(head, ELEMENTS[0]);
+      return head;
+    }
+
+    @Benchmark
+    public Object fastutil_intarraylist() {
+      final Object head = fastutilIntArrayList.get(0);
       assert Objects.equals(head, ELEMENTS[0]);
       return head;
     }
@@ -232,6 +339,55 @@ public class ArrayBenchmark {
       return values;
     }
 
+    @Benchmark
+    public Object jctools_mpscarrayqueue() {
+      org.jctools.queues.MpscArrayQueue<Integer> values = jctoolsMpscArrayQueue;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.poll();
+      }
+      assert values.isEmpty();
+      return values;
+    }
+
+    @Benchmark
+    public Object apache_commons_setuniquelist() {
+      org.apache.commons.collections4.list.SetUniqueList<Integer> values = apacheCommonsSetUniqueList;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.remove(0);
+      }
+      assert values.isEmpty();
+      return values;
+    }
+
+    @Benchmark
+    public Object agrona_manytooneconcurrentarrayqueue() {
+      org.agrona.concurrent.ManyToOneConcurrentArrayQueue<Integer> values = agronaManyToOneConcurrentArrayQueue;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.poll();
+      }
+      assert values.isEmpty();
+      return values;
+    }
+
+    @Benchmark
+    public Object hppc_intarraylist() {
+      com.carrotsearch.hppc.IntArrayList values = hppcIntArrayList;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.remove(0);
+      }
+      assert values.isEmpty();
+      return values;
+    }
+
+    @Benchmark
+    public Object fastutil_intarraylist() {
+      it.unimi.dsi.fastutil.ints.IntArrayList values = fastutilIntArrayList;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.remove(0);
+      }
+      assert values.isEmpty();
+      return values;
+    }
   }
 
   public static class Get extends Base {
@@ -290,6 +446,56 @@ public class ArrayBenchmark {
       int aggregate = 0;
       for (int i = 0; i < CONTAINER_SIZE; i++) {
         aggregate ^= eclipseMutable.get(i);
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int jctools_mpscarrayqueue() {
+      int aggregate = 0;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        aggregate ^= jctoolsMpscArrayQueue.poll();
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int apache_commons_setuniquelist() {
+      int aggregate = 0;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        aggregate ^= apacheCommonsSetUniqueList.get(i);
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int agrona_manytooneconcurrentarrayqueue() {
+      int aggregate = 0;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        aggregate ^= agronaManyToOneConcurrentArrayQueue.poll();
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int hppc_intarraylist() {
+      int aggregate = 0;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        aggregate ^= hppcIntArrayList.get(i);
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int fastutil_intarraylist() {
+      int aggregate = 0;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        aggregate ^= fastutilIntArrayList.get(i);
       }
       assert aggregate == EXPECTED_AGGREGATE;
       return aggregate;
@@ -356,6 +562,58 @@ public class ArrayBenchmark {
       assert values.allSatisfy(e -> e == 0);
       return values;
     }
+
+    @Benchmark
+    public Object jctools_mpscarrayqueue() {
+      org.jctools.queues.MpscArrayQueue<Integer> values = jctoolsMpscArrayQueue;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.poll();
+        values.offer(0);
+      }
+      assert values.stream().allMatch(e -> e == 0);
+      return values;
+    }
+
+    @Benchmark
+    public Object apache_commons_setuniquelist() {
+      org.apache.commons.collections4.list.SetUniqueList<Integer> values = apacheCommonsSetUniqueList;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.set(i, 0);
+      }
+      assert values.stream().allMatch(e -> e == 0);
+      return values;
+    }
+
+    @Benchmark
+    public Object agrona_manytooneconcurrentarrayqueue() {
+      org.agrona.concurrent.ManyToOneConcurrentArrayQueue<Integer> values = agronaManyToOneConcurrentArrayQueue;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.poll();
+        values.offer(0);
+      }
+      assert values.stream().allMatch(e -> e == 0);
+      return values;
+    }
+
+    @Benchmark
+    public Object hppc_intarraylist() {
+      com.carrotsearch.hppc.IntArrayList values = hppcIntArrayList;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.set(i, 0);
+      }
+      assert java.util.stream.IntStream.range(0, values.size()).allMatch(i -> values.get(i) == 0);
+      return values;
+    }
+
+    @Benchmark
+    public Object fastutil_intarraylist() {
+      it.unimi.dsi.fastutil.ints.IntArrayList values = fastutilIntArrayList;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.set(i, 0);
+      }
+      assert values.stream().allMatch(e -> e == 0);
+      return values;
+    }
   }
 
   public static class Prepend extends Base {
@@ -416,6 +674,56 @@ public class ArrayBenchmark {
         values.add(0, element);
       }
       assert areEqual(values, javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object jctools_mpscarrayqueue() {
+      org.jctools.queues.MpscArrayQueue<Integer> values = new org.jctools.queues.MpscArrayQueue<>(CONTAINER_SIZE);
+      for (Integer element : ELEMENTS) {
+        values.offer(element);
+      }
+      assert areEqual(List.ofAll(values).reverse(), javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object apache_commons_setuniquelist() {
+      org.apache.commons.collections4.list.SetUniqueList<Integer> values = org.apache.commons.collections4.list.SetUniqueList.setUniqueList(new ArrayList<>());
+      for (Integer element : ELEMENTS) {
+        values.add(0, element);
+      }
+      assert areEqual(List.ofAll(values).reverse(), javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object agrona_manytooneconcurrentarrayqueue() {
+      org.agrona.concurrent.ManyToOneConcurrentArrayQueue<Integer> values = new org.agrona.concurrent.ManyToOneConcurrentArrayQueue<>(CONTAINER_SIZE);
+      for (Integer element : ELEMENTS) {
+        values.offer(element);
+      }
+      assert areEqual(List.ofAll(values).reverse(), javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object hppc_intarraylist() {
+      com.carrotsearch.hppc.IntArrayList values = new com.carrotsearch.hppc.IntArrayList();
+      for (Integer element : ELEMENTS) {
+        values.add(0, element);
+      }
+      assert areEqual(List.ofAll(values).reverse(), javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object fastutil_intarraylist() {
+      it.unimi.dsi.fastutil.ints.IntArrayList values = new it.unimi.dsi.fastutil.ints.IntArrayList();
+      for (Integer element : ELEMENTS) {
+        values.add(0, element);
+      }
+      assert areEqual(List.ofAll(values).reverse(), javaMutable);
       return values;
     }
   }
@@ -482,6 +790,55 @@ public class ArrayBenchmark {
       return values;
     }
 
+    @Benchmark
+    public Object jctools_mpscarrayqueue() {
+      org.jctools.queues.MpscArrayQueue<Integer> values = new org.jctools.queues.MpscArrayQueue<>(CONTAINER_SIZE);
+      for (Integer element : ELEMENTS) {
+        values.offer(element);
+      }
+      assert areEqual(values, javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object apache_commons_setuniquelist() {
+      org.apache.commons.collections4.list.SetUniqueList<Integer> values = org.apache.commons.collections4.list.SetUniqueList.setUniqueList(new ArrayList<>());
+      for (Integer element : ELEMENTS) {
+        values.add(element);
+      }
+      assert areEqual(values, javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object agrona_manytooneconcurrentarrayqueue() {
+      org.agrona.concurrent.ManyToOneConcurrentArrayQueue<Integer> values = new org.agrona.concurrent.ManyToOneConcurrentArrayQueue<>(CONTAINER_SIZE);
+      for (Integer element : ELEMENTS) {
+        values.offer(element);
+      }
+      assert areEqual(values, javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object hppc_intarraylist() {
+      com.carrotsearch.hppc.IntArrayList values = new com.carrotsearch.hppc.IntArrayList();
+      for (Integer element : ELEMENTS) {
+        values.add(element);
+      }
+      assert areEqual(values, javaMutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object fastutil_intarraylist() {
+      it.unimi.dsi.fastutil.ints.IntArrayList values = new it.unimi.dsi.fastutil.ints.IntArrayList();
+      for (Integer element : ELEMENTS) {
+        values.add(element);
+      }
+      assert areEqual(values, javaMutable);
+      return values;
+    }
   }
 
   @SuppressWarnings("ForLoopReplaceableByForEach")
@@ -545,6 +902,56 @@ public class ArrayBenchmark {
       assert aggregate == EXPECTED_AGGREGATE;
       return aggregate;
     }
+
+    @Benchmark
+    public int jctools_mpscarrayqueue() {
+      int aggregate = 0;
+      for (java.util.Iterator<Integer> iterator = jctoolsMpscArrayQueue.iterator(); iterator.hasNext(); ) {
+        aggregate ^= iterator.next();
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int apache_commons_setuniquelist() {
+      int aggregate = 0;
+      for (java.util.Iterator<Integer> iterator = apacheCommonsSetUniqueList.iterator(); iterator.hasNext(); ) {
+        aggregate ^= iterator.next();
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int agrona_manytooneconcurrentarrayqueue() {
+      int aggregate = 0;
+      for (java.util.Iterator<Integer> iterator = agronaManyToOneConcurrentArrayQueue.iterator(); iterator.hasNext(); ) {
+        aggregate ^= iterator.next();
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int hppc_intarraylist() {
+      int aggregate = 0;
+      for (java.util.Iterator<IntCursor> iterator = hppcIntArrayList.iterator(); iterator.hasNext(); ) {
+        aggregate ^= iterator.next().value;
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int fastutil_intarraylist() {
+      int aggregate = 0;
+      for (java.util.Iterator<Integer> iterator = fastutilIntArrayList.iterator(); iterator.hasNext(); ) {
+        aggregate ^= iterator.next();
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
   }
 
   public static class Fill extends Base {
@@ -575,6 +982,28 @@ public class ArrayBenchmark {
     @Benchmark
     public Object eclipse_mutable_constant_object() {
       final org.eclipse.collections.api.list.MutableList<Integer> values = org.eclipse.collections.api.factory.Lists.mutable.withAll(java.util.Collections.nCopies(CONTAINER_SIZE, null));
+      final Integer head = values.get(0);
+      assert Objects.equals(head, ELEMENTS[0]);
+      return head;
+    }
+
+    @Benchmark
+    public Object hppc_intarraylist_constant_supplier() {
+      final com.carrotsearch.hppc.IntArrayList values = new com.carrotsearch.hppc.IntArrayList(CONTAINER_SIZE);
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.add(ELEMENTS[0]);
+      }
+      final Integer head = values.get(0);
+      assert Objects.equals(head, ELEMENTS[0]);
+      return head;
+    }
+
+    @Benchmark
+    public Object fastutil_intarraylist_constant_object() {
+      final it.unimi.dsi.fastutil.ints.IntArrayList values = new it.unimi.dsi.fastutil.ints.IntArrayList(CONTAINER_SIZE);
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values.add(ELEMENTS[0]);
+      }
       final Integer head = values.get(0);
       assert Objects.equals(head, ELEMENTS[0]);
       return head;

@@ -6,6 +6,6 @@ import org.openjdk.jmh.annotations.State;
 
 @State(Scope.Benchmark)
 public class CollectionBenchmarkBase {
-  @Param({"100"})
+  @Param({"1000"})
   public int CONTAINER_SIZE;
 }

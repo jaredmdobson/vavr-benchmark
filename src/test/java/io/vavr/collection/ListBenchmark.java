@@ -149,6 +149,13 @@ public class ListBenchmark {
       assert areEqual(values, javaMutable);
       return values;
     }
+    
+    @Benchmark
+    public Object guava_immutable() {
+      final com.google.common.collect.ImmutableList<Integer> values = com.google.common.collect.ImmutableList.copyOf(javaMutable);
+      assert areEqual(values, javaMutable);
+      return values;
+    }
   }
 
   public static class Head extends Base {

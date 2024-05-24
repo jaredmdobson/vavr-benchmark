@@ -49,13 +49,18 @@ public class MemoryUsage {
       Tuple.of("^java\\.", "Java mutable @ "),
       Tuple.of("^fj\\.", "Functional Java immutable @ "),
       Tuple.of("^org\\.pcollections", "PCollections immutable @ "),
-      Tuple.of("^org\\.eclipse\\.collections", "Eclipse Collections immutable @ "),
+      Tuple.of("^org\\.eclipse\\.collections", "Eclipse Collections @ "),
       Tuple.of("^clojure\\.", "Clojure immutable @ "),
       Tuple.of("^scalaz\\.Heap", "Scalaz immutable @ "),
       Tuple.of("^scala\\.collection.immutable", "Scala immutable @ "),
       Tuple.of("^scala\\.collection.mutable", "Scala mutable @ "),
       Tuple.of("^io\\.usethesource", "Capsule immutable @ "),
-      Tuple.of("^io\\.vavr\\.", "Vavr immutable @ ")
+      Tuple.of("^io\\.vavr\\.", "Vavr immutable @ "),
+      Tuple.of("^org\\.apache\\.commons\\.collections4\\.list\\.", "Apache Commons Collections mutable @ "),
+      Tuple.of("^it\\.unimi\\.dsi\\.fastutil\\.", "FastUtil mutable @ "),
+      Tuple.of("^com\\.carrotsearch", "HPPC mutable @ "),
+      Tuple.of("^org\\.argona\\.collections", "Argona Collections mutable @ "),
+      Tuple.of("^org\\.jctools\\.queues", "JCTools mutable @ ")
   ).mapKeys(r -> Pattern.compile(r).asPredicate());
 
   private static String toHumanReadableName(Object target) {
