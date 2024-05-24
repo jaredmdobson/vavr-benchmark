@@ -96,7 +96,7 @@ public class JmhRunner {
 
   @SuppressWarnings("unused")
   public static void runQuickNoAsserts(Array<Class<?>> groups, Includes... includes) {
-    run(6, 5, 20, VerboseMode.NORMAL, PrintInlining.DISABLE, groups, includes).print();
+    run(5, 5, 15, VerboseMode.NORMAL, PrintInlining.DISABLE, groups, includes).print();
   }
 
   @SuppressWarnings("unused")
@@ -154,6 +154,14 @@ public class JmhRunner {
   }
 
   /* Helper methods */
+
+  public static Integer[] fillArrayWithSize(int size) {
+    final Integer[] array = new Integer[size];
+    for (int i = 0; i < size; i++) {
+      array[i] = i;
+    }
+    return array;
+  }
 
   public static Integer[] getRandomValues(int size, int seed) {
     return getRandomValues(size, seed, false);

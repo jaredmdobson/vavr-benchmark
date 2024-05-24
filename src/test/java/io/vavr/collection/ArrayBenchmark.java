@@ -26,8 +26,7 @@ import org.openjdk.jmh.annotations.*;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import static io.vavr.JmhRunner.create;
-import static io.vavr.JmhRunner.getRandomValues;
+import static io.vavr.JmhRunner.*;
 import static io.vavr.collection.Collections.areEqual;
 import static java.util.Arrays.asList;
 
@@ -85,13 +84,13 @@ public class ArrayBenchmark {
 
     @Setup
     public void setup() {
-      ELEMENTS = getRandomValues(CONTAINER_SIZE, 0);
+      ELEMENTS = fillArrayWithSize(CONTAINER_SIZE);
       EXPECTED_AGGREGATE = Iterator.of(ELEMENTS).reduce(JmhRunner::aggregate);
 
       javaMutable = create(java.util.ArrayList::new, asList(ELEMENTS), v -> areEqual(v, asList(ELEMENTS)));
       fjavaMutable = create(fj.data.Array::array, ELEMENTS, ELEMENTS.length, v -> areEqual(v, asList(ELEMENTS)));
-      vavrImmutable = create(io.vavr.collection.Array::ofAll, javaMutable, v -> areEqual(v, javaMutable));
-      pcollVector = create(org.pcollections.TreePVector::from, javaMutable, v -> areEqual(v, javaMutable));
+      vavrImmutable = create(io.vavr.collection.Array::ofAll, new ArrayList<>(javaMutable), v -> areEqual(v, javaMutable));
+      pcollVector = create(org.pcollections.TreePVector::from, new ArrayList<>(javaMutable), v -> areEqual(v, javaMutable));
       eclipseMutable = create(org.eclipse.collections.api.factory.Lists.mutable::withAll, new ArrayList<>(javaMutable), v -> areEqual(v, javaMutable));
       eclipseFastList = create((ArrayList<Integer> s) -> {
         return org.eclipse.collections.impl.list.mutable.FastList.newList(s.stream().collect(java.util.stream.Collectors.toList()));
@@ -350,9 +349,9 @@ public class ArrayBenchmark {
 
     @Benchmark
     public Object apache_commons_setuniquelist() {
-      org.apache.commons.collections4.list.SetUniqueList<Integer> values = apacheCommonsSetUniqueList;
-      for (int i = 0; i < CONTAINER_SIZE; i++) {
-        values.remove(0);
+      org.apache.commons.collections4.list.SetUniqueList<Integer> values = org.apache.commons.collections4.list.SetUniqueList.setUniqueList(apacheCommonsSetUniqueList);
+      for (int i = CONTAINER_SIZE - 1; i >= 0; i--) {
+        values.remove(i);
       }
       assert values.isEmpty();
       return values;
@@ -371,8 +370,8 @@ public class ArrayBenchmark {
     @Benchmark
     public Object hppc_intarraylist() {
       com.carrotsearch.hppc.IntArrayList values = hppcIntArrayList;
-      for (int i = 0; i < CONTAINER_SIZE; i++) {
-        values.remove(0);
+      for (int i = CONTAINER_SIZE - 1; i >= 0; i--) {
+        values.remove(i);
       }
       assert values.isEmpty();
       return values;
@@ -381,8 +380,8 @@ public class ArrayBenchmark {
     @Benchmark
     public Object fastutil_intarraylist() {
       it.unimi.dsi.fastutil.ints.IntArrayList values = fastutilIntArrayList;
-      for (int i = 0; i < CONTAINER_SIZE; i++) {
-        values.remove(0);
+      for (int i = CONTAINER_SIZE - 1; i >= 0; i--) {
+        values.remove(i);
       }
       assert values.isEmpty();
       return values;
@@ -474,7 +473,10 @@ public class ArrayBenchmark {
     public int agrona_manytooneconcurrentarrayqueue() {
       int aggregate = 0;
       for (int i = 0; i < CONTAINER_SIZE; i++) {
-        aggregate ^= agronaManyToOneConcurrentArrayQueue.poll();
+        Integer polledValue = agronaManyToOneConcurrentArrayQueue.poll();
+        if (polledValue != null) {
+          aggregate ^= polledValue;
+        }
       }
       assert aggregate == EXPECTED_AGGREGATE;
       return aggregate;
@@ -925,8 +927,12 @@ public class ArrayBenchmark {
     @Benchmark
     public int agrona_manytooneconcurrentarrayqueue() {
       int aggregate = 0;
-      for (java.util.Iterator<Integer> iterator = agronaManyToOneConcurrentArrayQueue.iterator(); iterator.hasNext(); ) {
-        aggregate ^= iterator.next();
+      while (true) {
+        Integer value = agronaManyToOneConcurrentArrayQueue.poll();
+        if (value == null) {
+          break;
+        }
+        aggregate ^= value;
       }
       assert aggregate == EXPECTED_AGGREGATE;
       return aggregate;
