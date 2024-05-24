@@ -70,8 +70,12 @@ public class JmhRunner {
   public enum Includes {
     JAVA("java"),
     FUNCTIONAL_JAVA("fjava"),
+    APACHE_COMMONS("apache_commons"),
     PCOLLECTIONS("pcollections"),
     ECOLLECTIONS("ecollections"),
+    ARGONA("agrona"),
+    HPPC("hppc"),
+    FASTUTIL("fastutil"),
     CAPSULE("capsule"),
     CLOJURE("clojure"),
     SCALAZ("scalaz"),
@@ -92,7 +96,7 @@ public class JmhRunner {
 
   @SuppressWarnings("unused")
   public static void runQuickNoAsserts(Array<Class<?>> groups, Includes... includes) {
-    run(10, 5, 10, VerboseMode.NORMAL, PrintInlining.DISABLE, groups, includes).print();
+    run(6, 5, 20, VerboseMode.NORMAL, PrintInlining.DISABLE, groups, includes).print();
   }
 
   @SuppressWarnings("unused")

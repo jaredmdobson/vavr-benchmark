@@ -43,23 +43,23 @@ import static scala.collection.JavaConverters.asScalaBuffer;
 @SuppressWarnings({"ALL", "unchecked", "rawtypes"})
 public class VectorBenchmark {
   static final Array<Class<?>> CLASSES = Array.of(
-      Create.class,
-      Head.class,
-      Tail.class,
-      Get.class,
-      Update.class,
-      Map.class,
-      Filter.class,
-      Prepend.class,
-      PrependAll.class,
-      Append.class,
-      AppendAll.class,
-      Insert.class,
-      GroupBy.class,
-      Slice.class,
-      Sort.class,
-      Iterate.class
-      , Fill.class
+      VectorCreate.class,
+      VectorHead.class,
+      VectorTail.class,
+      VectorGet.class,
+      VectorUpdate.class,
+      VectorMap.class,
+      VectorFilter.class,
+      VectorPrepend.class,
+      VectorPrependAll.class,
+      VectorAppend.class,
+      VectorAppendAll.class,
+      VectorInsert.class,
+      VectorGroupBy.class,
+      VectorSlice.class,
+      VectorSort.class,
+      VectorIterate.class,
+      VectorFill.class
   );
 
   public static void main(String... args) {
@@ -112,7 +112,7 @@ public class VectorBenchmark {
   /**
    * Bulk creation from array based, boxed source
    */
-  public static class Create extends Base {
+  public static class VectorCreate extends Base {
     @Benchmark
     public Object java_mutable() {
       final java.util.List<Integer> values = new java.util.ArrayList<>(java.util.Arrays.asList(ELEMENTS));
@@ -187,7 +187,7 @@ public class VectorBenchmark {
     }
   }
 
-  public static class Head extends Base {
+  public static class VectorHead extends Base {
     @Benchmark
     public Object java_mutable() {
       final Object head = javaMutable.get(0);
@@ -238,7 +238,7 @@ public class VectorBenchmark {
     }
   }
 
-  public static class Tail extends Base {
+  public static class VectorTail extends Base {
     @State(Scope.Thread)
     public static class Initialized {
       final java.util.ArrayList<Integer> javaMutable = new java.util.ArrayList<>();
@@ -338,7 +338,7 @@ public class VectorBenchmark {
   /**
    * Aggregated, randomized access to every element
    */
-  public static class Get extends Base {
+  public static class VectorGet extends Base {
     @Benchmark
     public int java_mutable() {
       int aggregate = 0;
@@ -413,7 +413,7 @@ public class VectorBenchmark {
   /**
    * Randomized update of every element
    */
-  public static class Update extends Base {
+  public static class VectorUpdate extends Base {
     @State(Scope.Thread)
     public static class Initialized {
       final java.util.ArrayList<Integer> javaMutable = new java.util.ArrayList<>();
@@ -513,7 +513,7 @@ public class VectorBenchmark {
     }
   }
 
-  public static class Map extends Base {
+  public static class VectorMap extends Base {
     final CanBuildFrom canBuildFrom = scala.collection.immutable.Vector.canBuildFrom();
 
     private static int mapper(int i) {
@@ -526,88 +526,88 @@ public class VectorBenchmark {
       for (int i = 0; i < CONTAINER_SIZE; i++) {
         values[i] = mapper(values[i]);
       }
-      assert areEqual(Array.of(values), Array.of(ELEMENTS).map(Map::mapper));
+      assert areEqual(Array.of(values), Array.of(ELEMENTS).map(VectorMap::mapper));
       return values;
     }
 
     @Benchmark
     public Object java_mutable() {
-      final java.util.List<Integer> values = javaMutable.stream().map(Map::mapper).collect(toList());
-      assert areEqual(values, Array.of(ELEMENTS).map(Map::mapper));
+      final java.util.List<Integer> values = javaMutable.stream().map(VectorMap::mapper).collect(toList());
+      assert areEqual(values, Array.of(ELEMENTS).map(VectorMap::mapper));
       return values;
     }
 
     @Benchmark
     public Object ecollections_immutable() {
-      final org.eclipse.collections.api.list.ImmutableList<Integer> values = eCollectionsImmutable.collect(Map::mapper);
-      assert areEqual(values, Array.of(ELEMENTS).map(Map::mapper));
+      final org.eclipse.collections.api.list.ImmutableList<Integer> values = eCollectionsImmutable.collect(VectorMap::mapper);
+      assert areEqual(values, Array.of(ELEMENTS).map(VectorMap::mapper));
       return values;
     }
 
     @Benchmark
     public Object scala_immutable() {
-      final scala.collection.immutable.Vector<Integer> values = (scala.collection.immutable.Vector<Integer>) scalaImmutable.map(Map::mapper, canBuildFrom);
-      assert areEqual(asJavaCollection(values), Array.of(ELEMENTS).map(Map::mapper));
+      final scala.collection.immutable.Vector<Integer> values = (scala.collection.immutable.Vector<Integer>) scalaImmutable.map(VectorMap::mapper, canBuildFrom);
+      assert areEqual(asJavaCollection(values), Array.of(ELEMENTS).map(VectorMap::mapper));
       return values;
     }
 
     @Benchmark
     public Object vavr_immutable() {
-      final io.vavr.collection.Vector<Integer> values = vavrImmutable.map(Map::mapper);
-      assert areEqual(values, Array.of(ELEMENTS).map(Map::mapper));
+      final io.vavr.collection.Vector<Integer> values = vavrImmutable.map(VectorMap::mapper);
+      assert areEqual(values, Array.of(ELEMENTS).map(VectorMap::mapper));
       return values;
     }
 
     @Benchmark
     public Object vavr_immutable_int() {
-      final io.vavr.collection.Vector<Integer> values = vavrImmutableInt.map(Map::mapper);
-      assert areEqual(values, Array.of(ELEMENTS).map(Map::mapper));
+      final io.vavr.collection.Vector<Integer> values = vavrImmutableInt.map(VectorMap::mapper);
+      assert areEqual(values, Array.of(ELEMENTS).map(VectorMap::mapper));
       return values;
     }
   }
 
-  public static class Filter extends Base {
+  public static class VectorFilter extends Base {
     private static boolean isOdd(int i) {
       return (i & 1) == 1;
     }
 
     @Benchmark
     public Object java_mutable() {
-      final java.util.List<Integer> someValues = javaMutable.stream().filter(Filter::isOdd).collect(toList());
-      assert areEqual(someValues, Array.of(ELEMENTS).filter(Filter::isOdd));
+      final java.util.List<Integer> someValues = javaMutable.stream().filter(VectorFilter::isOdd).collect(toList());
+      assert areEqual(someValues, Array.of(ELEMENTS).filter(VectorFilter::isOdd));
       return someValues;
     }
 
     @Benchmark
     public Object ecollections_immutable() {
-      final org.eclipse.collections.api.list.ImmutableList<Integer> someValues = eCollectionsImmutable.select(Filter::isOdd);
-      assert areEqual(someValues, Array.of(ELEMENTS).filter(Filter::isOdd));
+      final org.eclipse.collections.api.list.ImmutableList<Integer> someValues = eCollectionsImmutable.select(VectorFilter::isOdd);
+      assert areEqual(someValues, Array.of(ELEMENTS).filter(VectorFilter::isOdd));
       return someValues;
     }
 
     @Benchmark
     public Object scala_immutable() {
-      final scala.collection.immutable.Vector<Integer> someValues = (scala.collection.immutable.Vector<Integer>) ((scala.collection.Traversable<Integer>) scalaImmutable).filter(Filter::isOdd);
-      assert areEqual(asJavaCollection(someValues), Array.of(ELEMENTS).filter(Filter::isOdd));
+      final scala.collection.immutable.Vector<Integer> someValues = (scala.collection.immutable.Vector<Integer>) ((scala.collection.Traversable<Integer>) scalaImmutable).filter(VectorFilter::isOdd);
+      assert areEqual(asJavaCollection(someValues), Array.of(ELEMENTS).filter(VectorFilter::isOdd));
       return someValues;
     }
 
     @Benchmark
     public Object vavr_immutable() {
-      final io.vavr.collection.Vector<Integer> someValues = vavrImmutable.filter(Filter::isOdd);
-      assert areEqual(someValues, Array.of(ELEMENTS).filter(Filter::isOdd));
+      final io.vavr.collection.Vector<Integer> someValues = vavrImmutable.filter(VectorFilter::isOdd);
+      assert areEqual(someValues, Array.of(ELEMENTS).filter(VectorFilter::isOdd));
       return someValues;
     }
 
     @Benchmark
     public Object vavr_immutable_int() {
-      final io.vavr.collection.Vector<Integer> someValues = vavrImmutableInt.filter(Filter::isOdd);
-      assert (someValues.trie.type.type() == int.class) && areEqual(someValues, Array.of(ELEMENTS).filter(Filter::isOdd));
+      final io.vavr.collection.Vector<Integer> someValues = vavrImmutableInt.filter(VectorFilter::isOdd);
+      assert (someValues.trie.type.type() == int.class) && areEqual(someValues, Array.of(ELEMENTS).filter(VectorFilter::isOdd));
       return someValues;
     }
   }
 
-  public static class Prepend extends Base {
+  public static class VectorPrepend extends Base {
     @Benchmark
     public Object java_mutable() {
       final java.util.ArrayList<Integer> values = new java.util.ArrayList<>(); /* no initial value, as we're simulating dynamic usage */
@@ -695,7 +695,7 @@ public class VectorBenchmark {
     }
   }
 
-  public static class PrependAll extends Base {
+  public static class VectorPrependAll extends Base {
     final CanBuildFrom canBuildFrom = scala.collection.immutable.Vector.canBuildFrom();
 
     @Benchmark
@@ -728,7 +728,7 @@ public class VectorBenchmark {
   /**
    * Add all elements (one-by-one, as we're not testing bulk operations)
    */
-  public static class Append extends Base {
+  public static class VectorAppend extends Base {
     @Benchmark
     public Object java_mutable() {
       final java.util.ArrayList<Integer> values = new java.util.ArrayList<>(); /* no initial value as we're simulating dynamic usage */
@@ -812,7 +812,7 @@ public class VectorBenchmark {
     }
   }
 
-  public static class AppendAll extends Base {
+  public static class VectorAppendAll extends Base {
     final CanBuildFrom canBuildFrom = scala.collection.immutable.Vector.canBuildFrom();
 
     @Benchmark
@@ -838,7 +838,7 @@ public class VectorBenchmark {
     }
   }
 
-  public static class Insert extends Base {
+  public static class VectorInsert extends Base {
     @Benchmark
     public void vavr_immutable(Blackhole bh) {
       for (int i = 0; i < CONTAINER_SIZE; i++) {
@@ -849,7 +849,7 @@ public class VectorBenchmark {
     }
   }
 
-  public static class GroupBy extends Base {
+  public static class VectorGroupBy extends Base {
     @Benchmark
     public Object java_mutable() {
       return javaMutable.stream().collect(groupingBy(Integer::bitCount));
@@ -869,7 +869,7 @@ public class VectorBenchmark {
   /**
    * Consume the vector one-by-one, from the front and back
    */
-  public static class Slice extends Base {
+  public static class VectorSlice extends Base {
     @Benchmark
     public void java_mutable(Blackhole bh) { /* stores the whole collection underneath */
       java.util.List<Integer> values = javaMutable;
@@ -931,7 +931,7 @@ public class VectorBenchmark {
     }
   }
 
-  public static class Sort extends Base {
+  public static class VectorSort extends Base {
     static final Ordering<Integer> SCALA_ORDERING = Ordering$.MODULE$.comparatorToOrdering(Integer::compareTo);
 
     @State(Scope.Thread)
@@ -975,7 +975,7 @@ public class VectorBenchmark {
   /**
    * Sequential access for all elements
    */
-  public static class Iterate extends Base {
+  public static class VectorIterate extends Base {
     @Benchmark
     public int java_mutable() {
       int aggregate = 0;
@@ -1060,7 +1060,7 @@ public class VectorBenchmark {
     }
   }
 
-  public static class Fill extends Base {
+  public static class VectorFill extends Base {
     @Benchmark
     public Object scala_immutable() {
       final scala.collection.immutable.Vector<?> values = scala.collection.immutable.Vector$.MODULE$.fill(CONTAINER_SIZE, () -> ELEMENTS[0]);

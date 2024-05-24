@@ -137,19 +137,19 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public Object eclipse_immutable() {
+    public Object ecollections_immutable() {
       final org.eclipse.collections.api.list.ImmutableList<Integer> values = org.eclipse.collections.api.factory.Lists.immutable.withAll(javaMutable);
       assert areEqual(values, javaMutable);
       return values;
     }
 
     @Benchmark
-    public Object eclipse_mutable() {
+    public Object ecollections_mutable() {
       final org.eclipse.collections.api.list.MutableList<Integer> values = org.eclipse.collections.api.factory.Lists.mutable.withAll(javaMutable);
       assert areEqual(values, javaMutable);
       return values;
     }
-    
+
     @Benchmark
     public Object guava_immutable() {
       final com.google.common.collect.ImmutableList<Integer> values = com.google.common.collect.ImmutableList.copyOf(javaMutable);
@@ -202,14 +202,14 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public Object eclipse_immutable() {
+    public Object ecollections_immutable() {
       final Object head = eclipseImmutable.get(0);
       assert Objects.equals(head, ELEMENTS[0]);
       return head;
     }
 
     @Benchmark
-    public Object eclipse_mutable() {
+    public Object ecollections_mutable() {
       final Object head = eclipseMutable.get(0);
       assert Objects.equals(head, ELEMENTS[0]);
       return head;
@@ -310,7 +310,7 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public Object eclipse_immutable() {
+    public Object ecollections_immutable() {
       org.eclipse.collections.api.list.ImmutableList<Integer> values = eclipseImmutable;
       for (int i = 0; i < CONTAINER_SIZE; i++) {
         values = values.subList(1, values.size());
@@ -320,7 +320,7 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public Object eclipse_mutable() {
+    public Object ecollections_mutable() {
       org.eclipse.collections.api.list.MutableList<Integer> values = eclipseMutable;
       for (int i = 0; i < CONTAINER_SIZE; i++) {
         values = values.subList(1, values.size());
@@ -393,7 +393,7 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public int eclipse_immutable() {
+    public int ecollections_immutable() {
       int aggregate = 0;
       for (int i = 0; i < CONTAINER_SIZE; i++) {
         aggregate ^= eclipseImmutable.get(i);
@@ -403,7 +403,7 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public int eclipse_mutable() {
+    public int ecollections_mutable() {
       int aggregate = 0;
       for (int i = 0; i < CONTAINER_SIZE; i++) {
         aggregate ^= eclipseMutable.get(i);
@@ -492,7 +492,7 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public Object eclipse_immutable() {
+    public Object ecollections_immutable() {
       org.eclipse.collections.api.list.ImmutableList<Integer> values = eclipseImmutable;
       for (int i = 0; i < CONTAINER_SIZE; i++) {
         values = values.subList(0, i)
@@ -504,7 +504,7 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public Object eclipse_mutable() {
+    public Object ecollections_mutable() {
       org.eclipse.collections.api.list.MutableList<Integer> values = eclipseMutable;
       for (int i = 0; i < CONTAINER_SIZE; i++) {
         values.set(i, 0);
@@ -587,7 +587,7 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public Object eclipse_immutable() {
+    public Object ecollections_immutable() {
       org.eclipse.collections.api.list.ImmutableList<Integer> values = org.eclipse.collections.api.factory.Lists.immutable.empty();
       for (Integer element : ELEMENTS) {
         values = values.newWith(element);
@@ -597,7 +597,7 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public Object eclipse_mutable() {
+    public Object ecollections_mutable() {
       org.eclipse.collections.api.list.MutableList<Integer> values = org.eclipse.collections.api.factory.Lists.mutable.empty();
       for (Integer element : ELEMENTS) {
         values.add(0, element);
@@ -670,7 +670,7 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public Object eclipse_immutable() {
+    public Object ecollections_immutable() {
       org.eclipse.collections.api.list.ImmutableList<Integer> values = org.eclipse.collections.api.factory.Lists.immutable.empty();
       for (Integer element : ELEMENTS) {
         values = values.newWith(element);
@@ -680,7 +680,7 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public Object eclipse_mutable() {
+    public Object ecollections_mutable() {
       org.eclipse.collections.api.list.MutableList<Integer> values = org.eclipse.collections.api.factory.Lists.mutable.empty();
       for (Integer element : ELEMENTS) {
         values.add(0, element);
@@ -712,12 +712,12 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public Object eclipse_immutable() {
+    public Object ecollections_immutable() {
       return eclipseImmutable.groupBy(Integer::bitCount);
     }
 
     @Benchmark
-    public Object eclipse_mutable() {
+    public Object ecollections_mutable() {
       return eclipseMutable.groupBy(Integer::bitCount);
     }
   }
@@ -795,7 +795,7 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public int eclipse_immutable() {
+    public int ecollections_immutable() {
       int aggregate = 0;
       for (java.util.Iterator<Integer> iterator = eclipseImmutable.iterator(); iterator.hasNext(); ) {
         aggregate ^= iterator.next();
@@ -805,7 +805,7 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public int eclipse_mutable() {
+    public int ecollections_mutable() {
       int aggregate = 0;
       for (java.util.Iterator<Integer> iterator = eclipseMutable.iterator(); iterator.hasNext(); ) {
         aggregate ^= iterator.next();
@@ -841,7 +841,7 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public Object eclipse_immutable_constant_supplier() {
+    public Object ecollections_immutable_constant_supplier() {
       final org.eclipse.collections.api.list.ImmutableList<Integer> values = org.eclipse.collections.api.factory.Lists.immutable.withAll(java.util.Collections.nCopies(CONTAINER_SIZE, null));
       final Integer head = values.get(0);
       assert Objects.equals(head, ELEMENTS[0]);
@@ -849,7 +849,7 @@ public class ListBenchmark {
     }
 
     @Benchmark
-    public Object eclipse_mutable_constant_object() {
+    public Object ecollections_mutable_constant_object() {
       final org.eclipse.collections.api.list.MutableList<Integer> values = org.eclipse.collections.api.factory.Lists.mutable.withAll(java.util.Collections.nCopies(CONTAINER_SIZE, null));
       final Integer head = values.get(0);
       assert Objects.equals(head, ELEMENTS[0]);
