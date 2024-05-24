@@ -30,8 +30,8 @@ import static scala.collection.JavaConverters.asScalaBuffer;
 
 public class BitSetBenchmark {
   static final Array<Class<?>> CLASSES = Array.of(
-      AddAll.class,
-      Iterate.class
+      BitSetAddAll.class,
+      BitSetIterate.class
   );
 
   public static void main(String... args) {
@@ -64,7 +64,7 @@ public class BitSetBenchmark {
     }
   }
 
-  public static class AddAll extends Base {
+  public static class BitSetAddAll extends Base {
     @Benchmark
     public Object scala_immutable() {
       scala.collection.immutable.BitSet values = new scala.collection.immutable.BitSet.BitSet1(0L);
@@ -87,7 +87,7 @@ public class BitSetBenchmark {
   }
 
   @SuppressWarnings("ForLoopReplaceableByForEach")
-  public static class Iterate extends Base {
+  public static class BitSetIterate extends Base {
     @Benchmark
     public int scala_immutable() {
       int aggregate = 0;

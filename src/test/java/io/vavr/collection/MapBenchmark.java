@@ -32,18 +32,18 @@ import static io.vavr.JmhRunner.getRandomValues;
 
 public class MapBenchmark {
   static final Array<Class<?>> CLASSES = Array.of(
-      IterateKeys.class,
-      VavrKeys.class,
-      VavrValues.class,
-      IterateValues.class,
-      Get.class,
-      Miss.class,
-      PutOrdered.class,
-      PutShuffled.class,
-      ReplaceSingle.class,
-      ReplaceAll.class,
-      ReplaceAllOneByOne.class,
-      Remove.class
+      MapIterateKeys.class,
+      MapVavrKeys.class,
+      MapVavrValues.class,
+      MapIterateValues.class,
+      MapGet.class,
+      MapMiss.class,
+      MapPutOrdered.class,
+      MapPutShuffled.class,
+      MapReplaceSingle.class,
+      MapReplaceAll.class,
+      MapReplaceAllOneByOne.class,
+      MapRemove.class
   );
 
   public static void main(String... args) {
@@ -110,7 +110,7 @@ public class MapBenchmark {
   }
 
   @SuppressWarnings("Duplicates")
-  public static class PutShuffled extends Base {
+  public static class MapPutShuffled extends Base {
     @Benchmark
     public Object pcollections_immutable() {
       org.pcollections.PMap<Integer, Integer> values = org.pcollections.HashTreePMap.empty();
@@ -169,7 +169,7 @@ public class MapBenchmark {
     }
   }
 
-  public static class PutOrdered extends Base {
+  public static class MapPutOrdered extends Base {
     @Benchmark
     public Object pcollections_immutable() {
       org.pcollections.PMap<Integer, Integer> values = org.pcollections.HashTreePMap.empty();
@@ -228,7 +228,7 @@ public class MapBenchmark {
     }
   }
 
-  public static class Get extends Base {
+  public static class MapGet extends Base {
     @Benchmark
     public void pcollections_immutable(Blackhole bh) {
       org.pcollections.PMap<Integer, Integer> values = pcollectionsImmutable;
@@ -273,7 +273,7 @@ public class MapBenchmark {
     }
   }
 
-  public static class Miss extends Base {
+  public static class MapMiss extends Base {
     @Benchmark
     public Object pcollections_immutable() {
       org.pcollections.PMap<Integer, Integer> values = pcollectionsImmutable;
@@ -305,7 +305,7 @@ public class MapBenchmark {
     }
   }
 
-  public static class IterateKeys extends Base {
+  public static class MapIterateKeys extends Base {
     @Benchmark
     public void pcollections_immutable(Blackhole bh) {
       org.pcollections.PMap<Integer, Integer> values = pcollectionsImmutable;
@@ -371,7 +371,7 @@ public class MapBenchmark {
     }
   }
 
-  public static class VavrKeys extends Base {
+  public static class MapVavrKeys extends Base {
     @Benchmark
     public void vavr_hash_keySet(Blackhole bh) {
       Map<Integer, Integer> values = vavrHash;
@@ -446,7 +446,7 @@ public class MapBenchmark {
 
   }
 
-  public static class VavrValues extends Base {
+  public static class MapVavrValues extends Base {
     @Benchmark
     public void vavr_hash_keySet(Blackhole bh) {
       Map<Integer, Integer> values = vavrHash;
@@ -521,7 +521,7 @@ public class MapBenchmark {
 
   }
 
-  public static class IterateValues extends Base {
+  public static class MapIterateValues extends Base {
     @Benchmark
     public void pcollections_immutable(Blackhole bh) {
       org.pcollections.PMap<Integer, Integer> values = pcollectionsImmutable;
@@ -565,7 +565,7 @@ public class MapBenchmark {
   }
 
   @SuppressWarnings("Duplicates")
-  public static class Remove extends Base {
+  public static class MapRemove extends Base {
     @Benchmark
     public Object pcollections_immutable() {
       org.pcollections.PMap<Integer, Integer> values = pcollectionsImmutable;
@@ -618,7 +618,7 @@ public class MapBenchmark {
   }
 
   @SuppressWarnings("Duplicates")
-  public static class ReplaceSingle extends Base {
+  public static class MapReplaceSingle extends Base {
     @Benchmark
     public Object pcollections_immutable() {
       org.pcollections.PMap<Integer, Integer> values = pcollectionsImmutable;
@@ -666,7 +666,7 @@ public class MapBenchmark {
   }
 
   @SuppressWarnings("CollectionAddedToSelf")
-  public static class ReplaceAll extends Base {
+  public static class MapReplaceAll extends Base {
     @Benchmark
     public Object pcollections_immutable() {
       org.pcollections.PMap<Integer, Integer> values = pcollectionsImmutable;
@@ -708,7 +708,7 @@ public class MapBenchmark {
   }
 
   @SuppressWarnings("CollectionAddedToSelf")
-  public static class ReplaceAllOneByOne extends Base {
+  public static class MapReplaceAllOneByOne extends Base {
     @Benchmark
     public Object pcollections_immutable() {
       org.pcollections.PMap<Integer, Integer> values = pcollectionsImmutable;

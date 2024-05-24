@@ -31,14 +31,14 @@ import static io.vavr.collection.Collections.areEqual;
 
 public class CharSeqBenchmark {
   static final Array<Class<?>> CLASSES = Array.of(
-      Head.class,
-      Tail.class,
-      Get.class,
-      Update.class,
-      Repeat.class,
-      Prepend.class,
-      Append.class,
-      Iterate.class
+      CharSeqHead.class,
+      CharSeqTail.class,
+      CharSeqGet.class,
+      CharSeqUpdate.class,
+      CharSeqRepeat.class,
+      CharSeqPrepend.class,
+      CharSeqAppend.class,
+      CharSeqIterate.class
   );
 
   public static void main(java.lang.String... args) {
@@ -69,7 +69,7 @@ public class CharSeqBenchmark {
     }
   }
 
-  public static class Head extends Base {
+  public static class CharSeqHead extends Base {
     @Benchmark
     public Object java_immutable() {
       final Object head = javaImmutable.charAt(0);
@@ -93,7 +93,7 @@ public class CharSeqBenchmark {
   }
 
   @SuppressWarnings("Convert2MethodRef")
-  public static class Tail extends Base {
+  public static class CharSeqTail extends Base {
     @Benchmark
     public Object java_immutable() {
       java.lang.String values = javaImmutable;
@@ -125,7 +125,7 @@ public class CharSeqBenchmark {
     }
   }
 
-  public static class Get extends Base {
+  public static class CharSeqGet extends Base {
     @Benchmark
     public int java_immutable() {
       int aggregate = 0;
@@ -157,7 +157,7 @@ public class CharSeqBenchmark {
     }
   }
 
-  public static class Update extends Base {
+  public static class CharSeqUpdate extends Base {
     final char replacement = '❤';
 
     @Benchmark
@@ -181,7 +181,7 @@ public class CharSeqBenchmark {
     }
   }
 
-  public static class Repeat extends Base {
+  public static class CharSeqRepeat extends Base {
     final char value = '❤';
 
     @Benchmark
@@ -190,7 +190,7 @@ public class CharSeqBenchmark {
     }
   }
 
-  public static class Prepend extends Base {
+  public static class CharSeqPrepend extends Base {
     @Benchmark
     public Object java_immutable() {
       java.lang.String values = "";
@@ -222,7 +222,7 @@ public class CharSeqBenchmark {
     }
   }
 
-  public static class Append extends Base {
+  public static class CharSeqAppend extends Base {
     @Benchmark
     public Object java_immutable() {
       java.lang.String values = "";
@@ -255,7 +255,7 @@ public class CharSeqBenchmark {
   }
 
   @SuppressWarnings("ForLoopReplaceableByForEach")
-  public static class Iterate extends Base {
+  public static class CharSeqIterate extends Base {
     @Benchmark
     public int java_immutable() {
       int aggregate = 0;

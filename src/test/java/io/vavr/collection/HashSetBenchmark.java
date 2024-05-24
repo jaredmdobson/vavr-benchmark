@@ -28,9 +28,9 @@ import static scala.collection.JavaConverters.asScalaBuffer;
 
 public class HashSetBenchmark {
   static final Array<Class<?>> CLASSES = Array.of(
-      Add.class,
-      Iterate.class,
-      Remove.class
+      HashSetAdd.class,
+      HashSetIterate.class,
+      HashSetRemove.class
   );
 
   public static void main(String... args) {
@@ -63,7 +63,7 @@ public class HashSetBenchmark {
     }
   }
 
-  public static class Add extends Base {
+  public static class HashSetAdd extends Base {
     @Benchmark
     public Object pcollections_immutable() {
       org.pcollections.PSet<Integer> values = org.pcollections.HashTreePSet.empty();
@@ -105,7 +105,7 @@ public class HashSetBenchmark {
     }
   }
 
-  public static class Remove extends Base {
+  public static class HashSetRemove extends Base {
     @Benchmark
     public Object pcollections_immutable() {
       org.pcollections.PSet<Integer> values = pcollectionsImmutable;
@@ -138,7 +138,7 @@ public class HashSetBenchmark {
   }
 
   @SuppressWarnings("ForLoopReplaceableByForEach")
-  public static class Iterate extends Base {
+  public static class HashSetIterate extends Base {
     @Benchmark
     public int scala_immutable() {
       int aggregate = 0;

@@ -40,10 +40,10 @@ import static scala.collection.JavaConverters.asScalaBuffer;
 @SuppressWarnings({"UnnecessaryFullyQualifiedName", "UnnecessarilyQualifiedInnerClassAccess"})
 public class PriorityQueueBenchmark {
   static final Array<Class<?>> CLASSES = Array.of(
-      Enqueue.class,
-      Dequeue.class,
-      Sort.class
-      , Fill.class
+      PriorityQueueEnqueue.class,
+      PriorityQueueDequeue.class,
+      PriorityQueueSort.class
+      , PriorityQueueFill.class
   );
 
   public static void main(String... args) {
@@ -72,7 +72,7 @@ public class PriorityQueueBenchmark {
     }
   }
 
-  public static class Enqueue extends Base {
+  public static class PriorityQueueEnqueue extends Base {
     @Benchmark
     @SuppressWarnings({"Convert2streamapi", "ManualArrayToCollectionCopy"})
     public Object java_mutable() {
@@ -137,7 +137,7 @@ public class PriorityQueueBenchmark {
   }
 
   @SuppressWarnings("Convert2MethodRef")
-  public static class Dequeue extends Base {
+  public static class PriorityQueueDequeue extends Base {
     @State(Scope.Thread)
     public static class Initialized {
       java.util.PriorityQueue<Integer> javaMutable = new java.util.PriorityQueue<>();
@@ -244,7 +244,7 @@ public class PriorityQueueBenchmark {
   }
 
   @SuppressWarnings("Convert2MethodRef")
-  public static class Sort extends Base {
+  public static class PriorityQueueSort extends Base {
     @Benchmark
     @SuppressWarnings("ManualArrayToCollectionCopy")
     public Object java_mutable() {
@@ -363,7 +363,7 @@ public class PriorityQueueBenchmark {
     }
   }
 
-  public static class Fill extends Base {
+  public static class PriorityQueueFill extends Base {
     @Benchmark
     public Object vavr_immutable_constant_supplier() {
       final io.vavr.collection.PriorityQueue<Integer> values = io.vavr.collection.PriorityQueue.fill(CONTAINER_SIZE, () -> ELEMENTS[0]);

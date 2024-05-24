@@ -33,15 +33,15 @@ import static java.util.Arrays.asList;
 
 public class ArrayBenchmark {
   static final Array<Class<?>> CLASSES = Array.of(
-      Create.class,
-      Head.class,
-      Tail.class,
-      Get.class,
-      Update.class,
-      Prepend.class,
-      Append.class,
-      Iterate.class
-      , Fill.class
+      ArrayCreate.class,
+      ArrayHead.class,
+      ArrayTail.class,
+      ArrayGet.class,
+      ArrayUpdate.class,
+      ArrayPrepend.class,
+      ArrayAppend.class,
+      ArrayIterate.class,
+      ArrayFill.class
   );
 
   public static void main(String... args) {
@@ -105,7 +105,7 @@ public class ArrayBenchmark {
     }
   }
 
-  public static class Create extends Base {
+  public static class ArrayCreate extends Base {
 
     @Benchmark
     public Object java_mutable() {
@@ -189,7 +189,7 @@ public class ArrayBenchmark {
     }
   }
 
-  public static class Head extends Base {
+  public static class ArrayHead extends Base {
 
 
     @Benchmark
@@ -271,7 +271,7 @@ public class ArrayBenchmark {
   }
 
   @SuppressWarnings("Convert2MethodRef")
-  public static class Tail extends Base {
+  public static class ArrayTail extends Base {
     @State(Scope.Thread)
     public static class Initialized {
       final java.util.ArrayList<Integer> javaMutable = new java.util.ArrayList<>();
@@ -389,7 +389,7 @@ public class ArrayBenchmark {
     }
   }
 
-  public static class Get extends Base {
+  public static class ArrayGet extends Base {
     @Benchmark
     public int java_mutable() {
       int aggregate = 0;
@@ -501,7 +501,7 @@ public class ArrayBenchmark {
     }
   }
 
-  public static class Update extends Base {
+  public static class ArrayUpdate extends Base {
     @Benchmark
     public Object java_mutable() {
       final java.util.ArrayList<Integer> values = javaMutable;
@@ -615,7 +615,7 @@ public class ArrayBenchmark {
     }
   }
 
-  public static class Prepend extends Base {
+  public static class ArrayPrepend extends Base {
     @Benchmark
     public Object java_mutable() {
       final java.util.ArrayList<Integer> values = new java.util.ArrayList<>(CONTAINER_SIZE);
@@ -727,7 +727,7 @@ public class ArrayBenchmark {
     }
   }
 
-  public static class Append extends Base {
+  public static class ArrayAppend extends Base {
     @SuppressWarnings("ManualArrayToCollectionCopy")
     @Benchmark
     public Object java_mutable() {
@@ -841,7 +841,7 @@ public class ArrayBenchmark {
   }
 
   @SuppressWarnings("ForLoopReplaceableByForEach")
-  public static class Iterate extends Base {
+  public static class ArrayIterate extends Base {
     @Benchmark
     public int java_mutable() {
       int aggregate = 0;
@@ -953,7 +953,7 @@ public class ArrayBenchmark {
     }
   }
 
-  public static class Fill extends Base {
+  public static class ArrayFill extends Base {
     @Benchmark
     public Object vavr_immutable_constant_supplier() {
       final io.vavr.collection.Array<Integer> values = io.vavr.collection.Array.fill(CONTAINER_SIZE, () -> ELEMENTS[0]);

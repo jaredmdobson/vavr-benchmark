@@ -33,8 +33,8 @@ import static io.vavr.JmhRunner.getRandomValues;
 public class IteratorBenchmark {
 
   static final Array<Class<?>> CLASSES = Array.of(
-      Sliding.class,
-      Concat.class
+      IteratorSliding.class,
+      IteratorConcat.class
   );
 
   public static void main(String... args) {
@@ -57,7 +57,7 @@ public class IteratorBenchmark {
     }
   }
 
-  public static class Sliding extends Base {
+  public static class IteratorSliding extends Base {
 
     @Benchmark
     public void scala_immutable(Blackhole bh) {
@@ -77,9 +77,9 @@ public class IteratorBenchmark {
   }
 
   @State(Scope.Benchmark)
-  public static class Concat {
+  public static class IteratorConcat {
 
-    @Param({"10", "20", "100", "1000"})
+    @Param({"1000", "10000"})
     private int size;
 
     @Benchmark

@@ -35,16 +35,16 @@ import static scala.collection.JavaConverters.asScalaBuffer;
 
 public class ListBenchmark {
   static final Array<Class<?>> CLASSES = Array.of(
-      Create.class,
-      Head.class,
-      Tail.class,
-      Get.class,
-      Update.class,
-      Prepend.class,
-      Append.class,
-      GroupBy.class,
-      Iterate.class
-      , Fill.class
+      ListCreate.class,
+      ListHead.class,
+      ListTail.class,
+      ListGet.class,
+      ListUpdate.class,
+      ListPrepend.class,
+      ListAppend.class,
+      ListGroupBy.class,
+      ListIterate.class,
+      ListFill.class
   );
 
   public static void main(String... args) {
@@ -93,7 +93,7 @@ public class ListBenchmark {
     }
   }
 
-  public static class Create extends Base {
+  public static class ListCreate extends Base {
     @Benchmark
     public Object java_mutable() {
       final ArrayList<Integer> values = new ArrayList<>(javaMutable);
@@ -158,7 +158,7 @@ public class ListBenchmark {
     }
   }
 
-  public static class Head extends Base {
+  public static class ListHead extends Base {
     @Benchmark
     public Object java_mutable() {
       final Object head = javaMutable.get(0);
@@ -217,7 +217,7 @@ public class ListBenchmark {
   }
 
   @SuppressWarnings("Convert2MethodRef")
-  public static class Tail extends Base {
+  public static class ListTail extends Base {
     @State(Scope.Thread)
     public static class Initialized {
       final java.util.ArrayList<Integer> javaMutable = new java.util.ArrayList<>();
@@ -331,7 +331,7 @@ public class ListBenchmark {
   }
 
 
-  public static class Get extends Base {
+  public static class ListGet extends Base {
     @Benchmark
     public int java_mutable() {
       int aggregate = 0;
@@ -413,7 +413,7 @@ public class ListBenchmark {
     }
   }
 
-  public static class Update extends Base {
+  public static class ListUpdate extends Base {
     @State(Scope.Thread)
     public static class Initialized {
       final java.util.ArrayList<Integer> javaMutable = new java.util.ArrayList<>();
@@ -515,7 +515,7 @@ public class ListBenchmark {
   }
 
   @SuppressWarnings("ManualArrayToCollectionCopy")
-  public static class Prepend extends Base {
+  public static class ListPrepend extends Base {
     @Benchmark
     public Object java_mutable() {
       final java.util.ArrayList<Integer> values = new java.util.ArrayList<>(CONTAINER_SIZE);
@@ -608,7 +608,7 @@ public class ListBenchmark {
   }
 
   @SuppressWarnings("ManualArrayToCollectionCopy")
-  public static class Append extends Base {
+  public static class ListAppend extends Base {
     @Benchmark
     public Object java_mutable() {
       final java.util.ArrayList<Integer> values = new java.util.ArrayList<>(CONTAINER_SIZE);
@@ -690,7 +690,7 @@ public class ListBenchmark {
     }
   }
 
-  public static class GroupBy extends Base {
+  public static class ListGroupBy extends Base {
     @Benchmark
     public Object java_mutable() {
       return javaMutable.stream().collect(Collectors.groupingBy(Integer::bitCount));
@@ -723,7 +723,7 @@ public class ListBenchmark {
   }
 
   @SuppressWarnings("ForLoopReplaceableByForEach")
-  public static class Iterate extends Base {
+  public static class ListIterate extends Base {
     @Benchmark
     public int java_mutable() {
       int aggregate = 0;
@@ -815,7 +815,7 @@ public class ListBenchmark {
     }
   }
 
-  public static class Fill extends Base {
+  public static class ListFill extends Base {
     @Benchmark
     public Object scala_immutable() {
       final scala.collection.immutable.List<?> values = scala.collection.immutable.List$.MODULE$.fill(CONTAINER_SIZE, () -> ELEMENTS[0]);
