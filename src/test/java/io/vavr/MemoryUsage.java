@@ -27,33 +27,43 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public class MemoryUsage {
-    private static final DecimalFormat FORMAT = new DecimalFormat("#,##0");
-    private static Map<Integer, LinkedHashSet<Seq<CharSeq>>> memoryUsages = TreeMap.empty(); // if forked, this will be reset every time
+  private static final DecimalFormat FORMAT = new DecimalFormat("#,##0");
+  private static Map<Integer, LinkedHashSet<Seq<CharSeq>>> memoryUsages = TreeMap.empty(); // if forked, this will be reset every time
 
-    static void storeMemoryUsages(int elementCount, Object target) {
-        memoryUsages = memoryUsages.put(elementCount, memoryUsages.get(elementCount).getOrElse(LinkedHashSet.empty()).add(Array.of(
-                toHumanReadableName(target),
-                toHumanReadableByteSize(target)
-        ).map(CharSeq::of)));
-    }
-    private static String toHumanReadableByteSize(Object target) { return FORMAT.format(byteSize(target)); }
-    private static long byteSize(Object target) { return GraphLayout.parseInstance(target).totalSize(); }
+  static void storeMemoryUsages(int elementCount, Object target) {
+    memoryUsages = memoryUsages.put(elementCount, memoryUsages.get(elementCount).getOrElse(LinkedHashSet.empty()).add(Array.of(
+        toHumanReadableName(target),
+        toHumanReadableByteSize(target)
+    ).map(CharSeq::of)));
+  }
 
-    private static HashMap<Predicate<String>, String> names = HashMap.ofEntries(
-            Tuple.of("^java\\.", "Java mutable @ "),
-            Tuple.of("^fj\\.", "Functional Java persistent @ "),
-            Tuple.of("^org\\.pcollections", "PCollections persistent @ "),
-            Tuple.of("^org\\.eclipse\\.collections", "Eclipse Collections persistent @ "),
-            Tuple.of("^clojure\\.", "Clojure persistent @ "),
-            Tuple.of("^scalaz\\.Heap", "Scalaz persistent @ "),
-            Tuple.of("^scala\\.collection.immutable", "Scala persistent @ "),
-            Tuple.of("^scala\\.collection.mutable", "Scala mutable @ "),
-            Tuple.of("^io\\.usethesource", "Capsule persistent @ "),
-            Tuple.of("^io\\.vavr\\.", "Vavr persistent @ ")
-    ).mapKeys(r -> Pattern.compile(r).asPredicate());
-    private static String toHumanReadableName(Object target) {
-        final Class<?> type = target.getClass();
-        return prefix(type) + type.getSimpleName();
-    }
-    private static String prefix(Class<?> type) { return names.find(p -> p._1.test(type.getName())).get()._2; }
+  private static String toHumanReadableByteSize(Object target) {
+    return FORMAT.format(byteSize(target));
+  }
+
+  private static long byteSize(Object target) {
+    return GraphLayout.parseInstance(target).totalSize();
+  }
+
+  private static HashMap<Predicate<String>, String> names = HashMap.ofEntries(
+      Tuple.of("^java\\.", "Java mutable @ "),
+      Tuple.of("^fj\\.", "Functional Java immutable @ "),
+      Tuple.of("^org\\.pcollections", "PCollections immutable @ "),
+      Tuple.of("^org\\.eclipse\\.collections", "Eclipse Collections immutable @ "),
+      Tuple.of("^clojure\\.", "Clojure immutable @ "),
+      Tuple.of("^scalaz\\.Heap", "Scalaz immutable @ "),
+      Tuple.of("^scala\\.collection.immutable", "Scala immutable @ "),
+      Tuple.of("^scala\\.collection.mutable", "Scala mutable @ "),
+      Tuple.of("^io\\.usethesource", "Capsule immutable @ "),
+      Tuple.of("^io\\.vavr\\.", "Vavr immutable @ ")
+  ).mapKeys(r -> Pattern.compile(r).asPredicate());
+
+  private static String toHumanReadableName(Object target) {
+    final Class<?> type = target.getClass();
+    return prefix(type) + type.getSimpleName();
+  }
+
+  private static String prefix(Class<?> type) {
+    return names.find(p -> p._1.test(type.getName())).get()._2;
+  }
 }

@@ -129,7 +129,7 @@ public class JmhRunner {
           .result("benchmark_results.json")
           /* We are using 4Gb and setting NewGen to 100% to avoid GC during testing.
              Any GC during testing will destroy the iteration (i.e. introduce unreliable noise in the measurement), which should get ignored as an outlier */
-          .jvmArgsAppend("-XX:+UseG1GC", "-Xss100m", "-Xms4g", "-Xmx4g", "-XX:MaxGCPauseMillis=1000", "-XX:+UnlockExperimentalVMOptions", "-XX:G1NewSizePercent=100", "-XX:G1MaxNewSizePercent=100", "-disableassertions");
+          .jvmArgsAppend("-XX:+UseG1GC", "-Xss150m", "-Xms6g", "-Xmx6g", "-XX:MaxGCPauseMillis=1000", "-XX:+UnlockExperimentalVMOptions", "-XX:G1NewSizePercent=100", "-XX:G1MaxNewSizePercent=100", "-disableassertions");
 
       final String includePattern = includeNames.mkString("\\..*?\\b(", "|", ")_");
       classNames.forEach(name -> builder.include(name + includePattern));

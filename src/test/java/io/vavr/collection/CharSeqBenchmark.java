@@ -30,263 +30,260 @@ import static io.vavr.JmhRunner.create;
 import static io.vavr.collection.Collections.areEqual;
 
 public class CharSeqBenchmark {
-    static final Array<Class<?>> CLASSES = Array.of(
-            Head.class,
-            Tail.class,
-            Get.class,
-            Update.class,
-            Repeat.class,
-            Prepend.class,
-            Append.class,
-            Iterate.class
-    );
+  static final Array<Class<?>> CLASSES = Array.of(
+      Head.class,
+      Tail.class,
+      Get.class,
+      Update.class,
+      Repeat.class,
+      Prepend.class,
+      Append.class,
+      Iterate.class
+  );
 
-    public static void main(java.lang.String... args) {
-        JmhRunner.runNormalNoAsserts(CLASSES);
+  public static void main(java.lang.String... args) {
+    JmhRunner.runNormalNoAsserts(CLASSES);
+  }
+
+  public static class Base extends CollectionBenchmarkBase {
+
+    int EXPECTED_AGGREGATE;
+    char[] ELEMENTS;
+
+    java.lang.String javaImmutable;
+    fj.data.LazyString fjavaImmutable;
+    io.vavr.collection.CharSeq vavrImmutable;
+
+    @Setup
+    public void setup() {
+      final Random random = new Random(0);
+      ELEMENTS = new char[CONTAINER_SIZE];
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        ELEMENTS[i] = (char) random.nextInt(Character.MAX_VALUE);
+      }
+      EXPECTED_AGGREGATE = Iterator.ofAll(ELEMENTS).reduce((x, y) -> (char) JmhRunner.aggregate((int) x, (int) y));
+
+      javaImmutable = create(java.lang.String::new, ELEMENTS, ELEMENTS.length, v -> java.util.Arrays.equals(v.toCharArray(), ELEMENTS));
+      fjavaImmutable = create(fj.data.LazyString::str, javaImmutable, javaImmutable.length(), v -> Objects.equals(v.toStringEager(), javaImmutable));
+      vavrImmutable = create(io.vavr.collection.CharSeq::of, javaImmutable, javaImmutable.length(), v -> v.contentEquals(javaImmutable));
+    }
+  }
+
+  public static class Head extends Base {
+    @Benchmark
+    public Object java_immutable() {
+      final Object head = javaImmutable.charAt(0);
+      assert Objects.equals(head, ELEMENTS[0]);
+      return head;
     }
 
-    @State(Scope.Benchmark)
-    public static class Base {
-        @Param({"10", "100", "1000", "2500"})
-        public int CONTAINER_SIZE;
-
-        int EXPECTED_AGGREGATE;
-        char[] ELEMENTS;
-
-        java.lang.String javaPersistent;
-        fj.data.LazyString fjavaPersistent;
-        io.vavr.collection.CharSeq vavrPersistent;
-
-        @Setup
-        public void setup() {
-            final Random random = new Random(0);
-            ELEMENTS = new char[CONTAINER_SIZE];
-            for (int i = 0; i < CONTAINER_SIZE; i++) {
-                ELEMENTS[i] = (char) random.nextInt(Character.MAX_VALUE);
-            }
-            EXPECTED_AGGREGATE = Iterator.ofAll(ELEMENTS).reduce((x, y) -> (char) JmhRunner.aggregate((int) x, (int) y));
-
-            javaPersistent = create(java.lang.String::new, ELEMENTS, ELEMENTS.length, v -> java.util.Arrays.equals(v.toCharArray(), ELEMENTS));
-            fjavaPersistent = create(fj.data.LazyString::str, javaPersistent, javaPersistent.length(), v -> Objects.equals(v.toStringEager(), javaPersistent));
-            vavrPersistent = create(io.vavr.collection.CharSeq::of, javaPersistent, javaPersistent.length(), v -> v.contentEquals(javaPersistent));
-        }
+    @Benchmark
+    public Object fjava_immutable() {
+      final Object head = fjavaImmutable.head();
+      assert Objects.equals(head, ELEMENTS[0]);
+      return head;
     }
 
-    public static class Head extends Base {
-        @Benchmark
-        public Object java_persistent() {
-            final Object head = javaPersistent.charAt(0);
-            assert Objects.equals(head, ELEMENTS[0]);
-            return head;
-        }
+    @Benchmark
+    public Object vavr_immutable() {
+      final Object head = vavrImmutable.head();
+      assert Objects.equals(head, ELEMENTS[0]);
+      return head;
+    }
+  }
 
-        @Benchmark
-        public Object fjava_persistent() {
-            final Object head = fjavaPersistent.head();
-            assert Objects.equals(head, ELEMENTS[0]);
-            return head;
-        }
-
-        @Benchmark
-        public Object vavr_persistent() {
-            final Object head = vavrPersistent.head();
-            assert Objects.equals(head, ELEMENTS[0]);
-            return head;
-        }
+  @SuppressWarnings("Convert2MethodRef")
+  public static class Tail extends Base {
+    @Benchmark
+    public Object java_immutable() {
+      java.lang.String values = javaImmutable;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values = values.substring(1);
+      }
+      assert values.isEmpty();
+      return values;
     }
 
-    @SuppressWarnings("Convert2MethodRef")
-    public static class Tail extends Base {
-        @Benchmark
-        public Object java_persistent() {
-            java.lang.String values = javaPersistent;
-            for (int i = 0; i < CONTAINER_SIZE; i++) {
-                values = values.substring(1);
-            }
-            assert values.isEmpty();
-            return values;
-        }
-
-        @Benchmark
-        public Object fjava_persistent() {
-            fj.data.LazyString values = fjavaPersistent;
-            for (int i = 0; i < CONTAINER_SIZE; i++) {
-                values = values.tail();
-            }
-            assert values.isEmpty();
-            return values;
-        }
-
-        @Benchmark
-        public Object vavr_persistent() {
-            io.vavr.collection.CharSeq values = vavrPersistent;
-            for (int i = 0; i < CONTAINER_SIZE; i++) {
-                values = values.tail();
-            }
-            assert values.isEmpty();
-            return values;
-        }
+    @Benchmark
+    public Object fjava_immutable() {
+      fj.data.LazyString values = fjavaImmutable;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values = values.tail();
+      }
+      assert values.isEmpty();
+      return values;
     }
 
-    public static class Get extends Base {
-        @Benchmark
-        public int java_persistent() {
-            int aggregate = 0;
-            for (int i = 0; i < CONTAINER_SIZE; i++) {
-                aggregate ^= javaPersistent.charAt(i);
-            }
-            assert aggregate == EXPECTED_AGGREGATE;
-            return aggregate;
-        }
+    @Benchmark
+    public Object vavr_immutable() {
+      io.vavr.collection.CharSeq values = vavrImmutable;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values = values.tail();
+      }
+      assert values.isEmpty();
+      return values;
+    }
+  }
 
-        @Benchmark
-        public int fjava_persistent() {
-            int aggregate = 0;
-            for (int i = 0; i < ELEMENTS.length; i++) {
-                aggregate ^= fjavaPersistent.charAt(i);
-            }
-            assert aggregate == EXPECTED_AGGREGATE;
-            return aggregate;
-        }
-
-        @Benchmark
-        public int vavr_persistent() {
-            int aggregate = 0;
-            for (int i = 0; i < CONTAINER_SIZE; i++) {
-                aggregate ^= vavrPersistent.charAt(i);
-            }
-            assert aggregate == EXPECTED_AGGREGATE;
-            return aggregate;
-        }
+  public static class Get extends Base {
+    @Benchmark
+    public int java_immutable() {
+      int aggregate = 0;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        aggregate ^= javaImmutable.charAt(i);
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
     }
 
-    public static class Update extends Base {
-        final char replacement = '❤';
-
-        @Benchmark
-        public Object java_persistent() {
-            java.lang.String values = javaPersistent;
-            for (int i = 0; i < CONTAINER_SIZE; i++) {
-                values = values.substring(0, i) + replacement + values.substring(i + 1);
-            }
-            assert Array.ofAll(values.toCharArray()).forAll(c -> c == replacement);
-            return values;
-        }
-
-        @Benchmark
-        public Object vavr_persistent() {
-            io.vavr.collection.CharSeq values = vavrPersistent;
-            for (int i = 0; i < CONTAINER_SIZE; i++) {
-                values = values.update(i, replacement);
-            }
-            assert values.forAll(c -> c == replacement);
-            return values;
-        }
+    @Benchmark
+    public int fjava_immutable() {
+      int aggregate = 0;
+      for (int i = 0; i < ELEMENTS.length; i++) {
+        aggregate ^= fjavaImmutable.charAt(i);
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
     }
 
-    public static class Repeat extends Base {
-        final char value = '❤';
+    @Benchmark
+    public int vavr_immutable() {
+      int aggregate = 0;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        aggregate ^= vavrImmutable.charAt(i);
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+  }
 
-        @Benchmark
-        public Object vavr_persistent() {
-            return CharSeq.of(value).repeat(CONTAINER_SIZE);
-        }
+  public static class Update extends Base {
+    final char replacement = '❤';
+
+    @Benchmark
+    public Object java_immutable() {
+      java.lang.String values = javaImmutable;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values = values.substring(0, i) + replacement + values.substring(i + 1);
+      }
+      assert Array.ofAll(values.toCharArray()).forAll(c -> c == replacement);
+      return values;
     }
 
-    public static class Prepend extends Base {
-        @Benchmark
-        public Object java_persistent() {
-            java.lang.String values = "";
-            for (int i = CONTAINER_SIZE - 1; i >= 0; i--) {
-                values = ELEMENTS[i] + values;
-            }
-            assert Objects.equals(values, javaPersistent);
-            return values;
-        }
+    @Benchmark
+    public Object vavr_immutable() {
+      io.vavr.collection.CharSeq values = vavrImmutable;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        values = values.update(i, replacement);
+      }
+      assert values.forAll(c -> c == replacement);
+      return values;
+    }
+  }
 
-        @Benchmark
-        public Object fjava_persistent() {
-            fj.data.LazyString values = fj.data.LazyString.empty;
-            for (int i = CONTAINER_SIZE - 1; i >= 0; i--) {
-                values = fj.data.LazyString.str(valueOf(ELEMENTS[i])).append(values);
-            }
-            assert Objects.equals(values.eval(), javaPersistent);
-            return values;
-        }
+  public static class Repeat extends Base {
+    final char value = '❤';
 
-        @Benchmark
-        public Object vavr_persistent() {
-            io.vavr.collection.CharSeq values = io.vavr.collection.CharSeq.empty();
-            for (int i = CONTAINER_SIZE - 1; i >= 0; i--) {
-                values = values.prepend(ELEMENTS[i]);
-            }
-            assert values.contentEquals(vavrPersistent);
-            return values;
-        }
+    @Benchmark
+    public Object vavr_immutable() {
+      return CharSeq.of(value).repeat(CONTAINER_SIZE);
+    }
+  }
+
+  public static class Prepend extends Base {
+    @Benchmark
+    public Object java_immutable() {
+      java.lang.String values = "";
+      for (int i = CONTAINER_SIZE - 1; i >= 0; i--) {
+        values = ELEMENTS[i] + values;
+      }
+      assert Objects.equals(values, javaImmutable);
+      return values;
     }
 
-    public static class Append extends Base {
-        @Benchmark
-        public Object java_persistent() {
-            java.lang.String values = "";
-            for (char c : ELEMENTS) {
-                values = values + c;
-            }
-            assert Objects.equals(values, javaPersistent);
-            return values;
-        }
-
-        @Benchmark
-        public Object fjava_persistent() {
-            fj.data.LazyString values = fj.data.LazyString.empty;
-            for (char c : ELEMENTS) {
-                values = values.append(valueOf(c));
-            }
-            assert areEqual(values.toStream(), vavrPersistent);
-            return values;
-        }
-
-        @Benchmark
-        public Object vavr_persistent() {
-            io.vavr.collection.CharSeq values = io.vavr.collection.CharSeq.empty();
-            for (char c : ELEMENTS) {
-                values = values.append(c);
-            }
-            assert values.contentEquals(vavrPersistent);
-            return values;
-        }
+    @Benchmark
+    public Object fjava_immutable() {
+      fj.data.LazyString values = fj.data.LazyString.empty;
+      for (int i = CONTAINER_SIZE - 1; i >= 0; i--) {
+        values = fj.data.LazyString.str(valueOf(ELEMENTS[i])).append(values);
+      }
+      assert Objects.equals(values.eval(), javaImmutable);
+      return values;
     }
 
-    @SuppressWarnings("ForLoopReplaceableByForEach")
-    public static class Iterate extends Base {
-        @Benchmark
-        public int java_persistent() {
-            int aggregate = 0;
-            for (int i = 0; i < CONTAINER_SIZE; i++) {
-                aggregate ^= javaPersistent.charAt(i);
-            }
-            assert aggregate == EXPECTED_AGGREGATE;
-            return aggregate;
-        }
-
-        @Benchmark
-        public int fjava_persistent() {
-            int aggregate = 0;
-            for (final java.util.Iterator<Character> iterator = fjavaPersistent.toStream().iterator(); iterator.hasNext(); ) {
-                aggregate ^= iterator.next();
-            }
-            assert aggregate == EXPECTED_AGGREGATE;
-            return aggregate;
-        }
-
-        @Benchmark
-        public int vavr_persistent() {
-            int aggregate = 0;
-            for (final Iterator<Character> iterator = vavrPersistent.iterator(); iterator.hasNext(); ) {
-                aggregate ^= iterator.next();
-            }
-            assert aggregate == EXPECTED_AGGREGATE;
-            return aggregate;
-        }
+    @Benchmark
+    public Object vavr_immutable() {
+      io.vavr.collection.CharSeq values = io.vavr.collection.CharSeq.empty();
+      for (int i = CONTAINER_SIZE - 1; i >= 0; i--) {
+        values = values.prepend(ELEMENTS[i]);
+      }
+      assert values.contentEquals(vavrImmutable);
+      return values;
     }
+  }
+
+  public static class Append extends Base {
+    @Benchmark
+    public Object java_immutable() {
+      java.lang.String values = "";
+      for (char c : ELEMENTS) {
+        values = values + c;
+      }
+      assert Objects.equals(values, javaImmutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object fjava_immutable() {
+      fj.data.LazyString values = fj.data.LazyString.empty;
+      for (char c : ELEMENTS) {
+        values = values.append(valueOf(c));
+      }
+      assert areEqual(values.toStream(), vavrImmutable);
+      return values;
+    }
+
+    @Benchmark
+    public Object vavr_immutable() {
+      io.vavr.collection.CharSeq values = io.vavr.collection.CharSeq.empty();
+      for (char c : ELEMENTS) {
+        values = values.append(c);
+      }
+      assert values.contentEquals(vavrImmutable);
+      return values;
+    }
+  }
+
+  @SuppressWarnings("ForLoopReplaceableByForEach")
+  public static class Iterate extends Base {
+    @Benchmark
+    public int java_immutable() {
+      int aggregate = 0;
+      for (int i = 0; i < CONTAINER_SIZE; i++) {
+        aggregate ^= javaImmutable.charAt(i);
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int fjava_immutable() {
+      int aggregate = 0;
+      for (final java.util.Iterator<Character> iterator = fjavaImmutable.toStream().iterator(); iterator.hasNext(); ) {
+        aggregate ^= iterator.next();
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+
+    @Benchmark
+    public int vavr_immutable() {
+      int aggregate = 0;
+      for (final Iterator<Character> iterator = vavrImmutable.iterator(); iterator.hasNext(); ) {
+        aggregate ^= iterator.next();
+      }
+      assert aggregate == EXPECTED_AGGREGATE;
+      return aggregate;
+    }
+  }
 }
